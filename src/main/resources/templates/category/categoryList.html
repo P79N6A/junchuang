@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head"></head>
+<title>军创电子科技--类别管理</title>
+<body>
+<div th:replace="fragments/header :: header"></div>
+<div th:replace="fragments/menu :: menu"></div>
+<div class="col-sm-10 col-lg-10 main">
+    <div class="row">
+        <ul class="breadcrumb">
+            <li>类别管理</li>
+            <li class="active" th:text="'查看' + ${title}">查看类别列表</li>
+        </ul>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+                    <div style="margin-bottom: 25px;">
+                        <input id="btnAdd" class="btn btn-primary" type="button" value="添加">
+                        <input id="btnEdit" class="btn btn-success" type="button" value="编辑">
+                        <input id="btnDel" class="btn btn-danger" type="button" value="删除">
+                        <input id="coverView" class="btn btn-warning" type="button" value="查看封面" onclick="coverView()" style="display: none">
+                    </div>
+                        <div class="panel panel-primary ">
+                            <div class="panel-heading">
+                                <h3 class="panel-title" th:text="${title}"></h3>
+                            </div>
+                            <div class="panel-body right_centent" style="">
+                                <input type="hidden" id="type" name="type" th:value="${type}"/>
+                                <div id="left-tree"></div>
+                            </div>
+                        </div>
+        </div>
+    </div>
+
+    <!-- 添加窗口 -->
+    <div class="modal fade" id="addOperation-dialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+
+            <div class="modal-content radius_5">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">新增</h4>
+                </div>
+                <form action="#" id="myForm" class="form-horizontal" role="form">
+                    <input type="hidden" id="txt_type" name="type" th:value="${type}"/>
+                    <input type="hidden" id="txt_parentId" name="parentId" th:value="0"/>
+                    <input type="hidden" id="id" name="id" th:value="0"/>
+                    <div class="modal-body">
+                        <div group="" item="add">
+                            <div>
+                                <div class="input-group margin-t-5 col-xs-12">
+                                    <label for="addName" class="col-sm-3 teach-control-label">名称：</label>
+                                    <div class="col-sm-5">
+                                    <input id="addName" type="text" name="text" class="form-control" required/>
+                                    <label id="txt_addName-error" class="error" for="addName" style="display: none;"></label>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div group="" item="add" id="selectCover">
+                            <div>
+                                <div class="input-group margin-t-5 col-xs-12">
+                                    <input type="hidden" id="filePath" name="filePath">
+                                    <input type="hidden" name="cover">
+                                    <label for="cover" class="col-sm-3 teach-control-label">封面：</label>
+                                    <div class="col-sm-5">
+                                        <input id="cover" type="text" name="cover" class="form-control" required disabled/>
+                                    </div>
+                                    <label for="file">
+                                        <input type="button" class="btn btn-default" value="选择图片" onclick="openFile()">
+                                    </label>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button id="Save" type="button" class="btn btn-primary">保存</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+
+                    </div>
+                </form>
+
+                <form enctype="multipart/form-data" method="POST" action="/file/uploadFile" id="fileForm">
+                    <input type="file" id="file" accept="image/*" style="display: none" name="file"
+                           onchange="uploadFile()">
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="modal fade" id="coverModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+
+            <div class="modal-content radius_5">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="coverModalLabel">查看封面</h4>
+                </div>
+                <div class="modal-body">
+                    <img id="coverFilePath" style="max-width: 100%">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div></div>
+</body>
+<script th:inline="javascript">
+
+    $(function () {
+
+        onLoad();
+
+        BindEvent();
+        //页面加载
+        function onLoad() {
+            //渲染树
+            $('#left-tree').treeview({
+                data: getTree(),
+                levels: 1,
+                onNodeSelected: function (event, node) {
+                    $('#editName').val(node.text);
+                },
+                showCheckbox: false//是否显示多选
+            });
+        }
+
+        //事件注册
+        function BindEvent() {
+            //保存-新增
+            $("#Save").click(function () {
+                var parentNode = $('#left-tree').treeview('getSelected');
+                if ($("#myForm").valid()) {
+                    $.ajax({
+                        type: "POST",
+                        url: $("#myForm").attr("action"),
+                        data: $('#myForm').serialize(),
+                        async: false,
+                        success: function (data) {
+                            if (data.message == "success") {
+                                BootstrapDialog.alert("操作成功");
+                                $('#addOperation-dialog').modal('hide')
+                                if (data.isMod == "true") {
+                                    var newNode={
+                                        text:$('#addName').val(),
+                                        filePath:$('#filePath').val(),
+                                        cover:$('#cover').val()
+                                    };
+                                    $("#coverFilePath").attr('src',$('#filePath').val());
+                                    $('#left-tree').treeview('updateNode', [ parentNode, newNode]);
+                                } else {
+                                    var node = {
+                                        text: $('#addName').val(),
+                                        id:data.category.id,
+                                        type:data.category.type,
+                                        subType:data.category.subType,
+                                        filePath:data.category.filePath,
+                                        cover:data.category.cover
+                                    };
+                                    $("#coverFilePath").attr('src',data.category.filePath);
+                                    $('#left-tree').treeview('addNode', [node, parentNode]);
+                                }
+                            } else {
+                                $("#txt_addName-error").text("类别已存在").show();
+                                return;
+                            }
+                        },
+                        error: function (request) {
+                            alert("Connection error");
+                        }
+                    });
+                }
+            });
+        }
+
+        //显示-添加
+        $("#btnAdd").click(function () {
+            var node = $('#left-tree').treeview('getSelected');
+            if (node.length == 0) {
+                $.showMsgText('请选择节点');
+                return;
+            }
+
+            var nodeId = node[0].nodeId;
+            var arr=nodeId.split(".");
+            if(arr.length == 3) {
+                $("#selectCover").show();
+            } else {
+                $("#selectCover").hide();
+            }
+
+            $('#filePath').val('');
+            $("[name='cover']").val('');
+            $('#addName').val('');
+            $("#txt_parentId").val(node[0].id);
+            $("#txt_addName-error").hide();
+            $("#myForm").attr("action", "/category/addCategory");
+            $("#myModalLabel").text("新增");
+            $('#addOperation-dialog').modal('show');
+
+        });
+        //显示-编辑
+        $("#btnEdit").click(function () {
+            var node = $('#left-tree').treeview('getSelected');
+            if (node.length == 0) {
+                $.showMsgText('请选择节点');
+                return;
+            }
+            var nodeId = node[0].nodeId;
+            var arr=nodeId.split(".");
+            if(arr.length == 4) {
+                $("#selectCover").show();
+                $('#filePath').val(node[0].filePath);
+                $("[name='cover']").val(node[0].cover);
+            } else {
+                $("#selectCover").hide();
+                $('#filePath').val('');
+                $("[name='cover']").val('');
+            }
+
+            $('#addName').val(node[0].text);
+            $("#id").val(node[0].id);
+            $("#txt_addName-error").hide();
+            $("#myForm").attr("action", "/category/modCategory");
+            $("#myModalLabel").text("编辑");
+            $('#addOperation-dialog').modal('show');
+
+        });
+        
+        //删除
+        $("#btnDel").click(function () {
+            var node = $('#left-tree').treeview('getSelected');
+            if (node.length == 0) {
+                $.showMsgText('请选择类别');
+                return;
+            }
+            BootstrapDialog.confirm("确定删除此类别", function(result){
+                if(result) {
+                    $.ajax({
+                        type: "GET",
+                        url: "/category/delCategory?id=" + node[0].id,
+                        async: false,
+                        success: function (data) {
+                            if (data.msg == "success") {
+                                BootstrapDialog.alert("操作成功");
+                                $('#left-tree').treeview('removeNode', [node, {silent: true}]);
+                            } else if(data.msg == "hasChild") {
+                                BootstrapDialog.alert("该类别下有子类别或教案，不能删除！");
+                                return;
+                            }
+                        },
+                        error: function (request) {
+                            alert("Connection error");
+                        }
+                    });
+                }else {
+                    return;
+                }
+            });
+
+        });
+
+        //获取树数据
+        function getTree() {
+            var treeData = [];
+            $.ajax({
+                type: "GET",
+                url: "/category/getCategoryList?type=" + $("#type").val(),
+                async: false,
+                success: function (data) {
+                    treeData = data;
+                },
+                error: function (request) {
+                    alert("Connection error");
+                }
+            });
+            return treeData;
+        }
+
+        /*-----页面pannel内容区高度自适应 start-----*/
+        $(window).resize(function () {
+            setCenterHeight();
+        });
+        setCenterHeight();
+        function setCenterHeight() {
+            var height = $(window).height();
+            var centerHight = height * 0.6;
+            $(".right_centent").height(centerHight).css("overflow", "auto");
+        }
+
+        /*-----页面pannel内容区高度自适应 end-----*/
+        $(document).on("click",".node-left-tree",function (e) {
+            setTimeout( function() {
+                var node = $('#left-tree').treeview('getSelected');
+                var nodeId = node[0].nodeId;
+                var arr=nodeId.split(".");
+                if (node.length > 0) {
+                    var text = node[0].text;
+                    var type = node[0].type;
+                    var subType = node[0].subType;
+                    // 课程主类别不允许修改
+                    if (text == "课程") {
+                        $("#btnAdd").attr("disabled",true);
+                        $("#btnEdit").attr("disabled",true);
+                        $("#btnDel").attr("disabled",true);
+                        $("#coverView").hide();
+                    } else if(type != 0 || subType != 0) {
+                        $("#btnAdd").attr("disabled",false);
+                        $("#btnEdit").attr("disabled",true);
+                        $("#btnDel").attr("disabled",true);
+                        $("#coverView").hide();
+                    } else {
+                        $("#btnAdd").attr("disabled",true);
+                        $("#btnEdit").attr("disabled",false);
+                        $("#btnDel").attr("disabled",false);
+                        if (arr.length ==4) {
+                            $("#coverFilePath").attr('src',node[0].filePath);
+                            $("#coverView").show();
+                        } else {
+                            $("#coverView").hide();
+                        }
+                    }
+                    $("#btnAdd").val("添加" + text);
+                    $("#btnEdit").val("编辑" + text);
+                    $("#btnDel").val("删除" + text);
+                }
+            },10);
+        });
+    });
+
+    function openFile() {
+        $("#file").click();
+    }
+
+    function uploadFile() {
+
+        var file = document.getElementById("file").files[0];
+        if (file == 'undefined') {
+            return;
+        }
+        var size = file.size;
+        if (size / (1024 * 1024) > 10.0) {
+            BootstrapDialog.alert("文件大小限制为10M以下！");
+            return;
+        }
+        var fileName = file.name;
+        var suffix = fileName.substr(fileName.lastIndexOf(".") + 1, fileName.length);
+        $("[name='cover']").val(fileName);
+        var formData = new FormData($('#fileForm')[0]);
+        formData.append("type", 'cover');
+        $.ajax({
+            url: "/file/uploadFile",
+            type: 'POST',
+            dataType: 'json', //返回值类型，一般设置为json、application/json
+            data: formData, //传递参数到服务器
+            async: false,
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function (data, status) {
+                if (data.message == "error") {
+                    BootstrapDialog.alert("文件处理失败!");
+                    return;
+                }
+
+                var filePath = data.filePath;
+                    $("#filePath").val(filePath);
+            },
+            error: function (data, status, e) {
+                BootstrapDialog.alert("错误：上传组件错误，请检察网络!");
+            }
+        });
+    }
+    function coverView() {
+        var node = $('#left-tree').treeview('getSelected');
+        if (node.length == 0) {
+            $.showMsgText('请选择节点');
+            return;
+        }
+        $('#coverModal').modal('show');
+
+    }
+</script>
+</html>

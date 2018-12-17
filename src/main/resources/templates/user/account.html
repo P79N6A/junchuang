@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head"></head>
+<title>军创电子科技--用户管理</title>
+<body>
+<div th:replace="fragments/header :: header"></div>
+<div th:replace="fragments/menu :: menu"></div>
+<div class="col-sm-10 col-lg-10 main">
+    <div class="row">
+        <ul class="breadcrumb">
+            <li>用户管理</li>
+            <li class="active">用户列表</li>
+        </ul>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <span>查询条件</span>
+                </div>
+                <div class="panel-body">
+                    <form action="#" class="form-horizontal" role="form" id="searchForm">
+                        <div class="row">
+                            <div class="form-group col-xs-4">
+                                <label class="teach-control-label col-sm-3 control-label">用户名：</label>
+                                <div class="col-sm-5">
+                                    <input type="text" name="account" class="form-control input-sm" id="account">
+                                </div>
+                            </div>
+                            <div class="form-group col-xs-4">
+                                <label class="teach-control-label col-sm-3 control-label">角色：</label>
+                                <div class="col-sm-5">
+                                    <select class='form-control' name="type" id="type">
+                                        <option value="">所有</option>
+                                        <option value="0">系统管理员</option>
+                                        <option value="1">数据库管理员</option>
+                                        <option value="2">普通用户</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group col-xs-4">
+                                <label class="teach-control-label col-sm-3 control-label">实际姓名：</label>
+                                <div class="col-sm-5">
+                                    <input type="text" name="name" class="form-control input-sm" id="name">
+                                </div>
+                            </div>
+                            <div class="form-group col-xs-4">
+                                <label class="teach-control-label col-sm-3 control-label">性别：</label>
+                                <div class="col-sm-5">
+                                    <select class='form-control' name="sex" id="sex">
+                                        <option value="">所有</option>
+                                        <option value="男">男</option>
+                                        <option value="女">女</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <!--<div class="form-group col-xs-4">-->
+                                <!--<label class="teach-control-label col-sm-3 control-label">参加人影日期：</label>-->
+                                <!--<div class="col-sm-5">-->
+                                    <!--<input type="text" name="joinRenyingDate" class="form-control input-sm" id="joinRenyingDate">-->
+                                <!--</div>-->
+                            <!--</div>-->
+                            <!--<div class="form-group col-xs-4">-->
+                                <!--<label class="teach-control-label col-sm-3 control-label">省人影批准日期：</label>-->
+                                <!--<div class="col-sm-5">-->
+                                    <!--<input type="text" name="provinceApproveRenyingDate" class="form-control input-sm" id="provinceApproveRenyingDate">-->
+                                <!--</div>-->
+                            <!--</div>-->
+                            <!--<div class="form-group col-xs-4">-->
+                                <!--<label class="teach-control-label col-sm-3 control-label">市人影批准日期：</label>-->
+                                <!--<div class="col-sm-5">-->
+                                    <!--<input type="text" name="cityApproveRenyingDate" class="form-control input-sm" id="cityApproveRenyingDate">-->
+                                <!--</div>-->
+                            <!--</div>-->
+                            <div class="form-group col-xs-4">
+                                <label class="teach-control-label col-sm-3 control-label">家庭住址：</label>
+                                <div class="col-sm-5">
+                                    <input type="text" name="address" class="form-control input-sm" id="address">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="teach-review-btns">
+                        <div class="col-sm-2">
+                            <button class="btn btn-primary" id="btnQuery" onclick="searchData();">
+                                查询
+                            </button>
+                        </div>
+                        <div class="col-sm-2">
+                            <button class="btn btn-primary" onclick="addAccount();">添加</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <span>查询结果</span>
+                </div>
+                <div class="panel-body">
+                    <div id="jqGrid_wrapper">
+                        <table id="jqGridList"></table>
+                        <div id="jqGridPager"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加窗口 -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">新增</h4>
+                </div>
+                <div class="modal-body">
+
+                    <form action="#" id="myForm" class="form-horizontal" role="form">
+                        <div class="form-group col-xs-12">
+                            <label for="txt_account" class="col-sm-3 teach-control-label">用户名：</label>
+                            <div class="col-sm-5">
+                                <input type="text" name="account" class="form-control" id="txt_account" required onblur="checkAccount()" >
+                                <label id="txt_account-error" class="error" for="txt_account" style="display: none;"></label>
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12">
+                            <label for="txt_status" class="col-sm-3 teach-control-label">角色：</label>
+                            <div class="col-sm-5">
+                                <select class='form-control' name="type" id="txt_status" required>
+                                    <option value="">请选择</option>
+                                    <option value="1">学校</option>
+                                    <option value="2">教师</option>
+                                    <option value="3">学员</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12">
+                            <label for="txt_name" class="col-sm-3 teach-control-label">实际姓名：</label>
+                            <div class="col-sm-5">
+                                <input type="text" name="name" class="form-control" id="txt_name" required >
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12">
+                            <label for="txt_name" class="col-sm-3 teach-control-label">手机号码：</label>
+                            <div class="col-sm-5">
+                                <input type="text" name="phone" class="form-control" id="txt_phone" required >
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12">
+                            <label for="txt_name" class="col-sm-3 teach-control-label">办公室电话：</label>
+                            <div class="col-sm-5">
+                                <input type="text" name="officePhone" class="form-control" id="txt_officePhone" >
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12">
+                            <label for="txt_status" class="col-sm-3 teach-control-label">性别：</label>
+                            <div class="col-sm-5">
+                                <select class='form-control' name="sex" id="txt_sex" required>
+                                    <option value="男">男</option>
+                                    <option value="女">女</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12">
+                            <label for="txt_name" class="col-sm-3 teach-control-label">身份证号码：</label>
+                            <div class="col-sm-5">
+                                <input type="text" name="idNumber" class="form-control" id="txt_idNumber" required >
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12">
+                            <label for="txt_name" class="col-sm-3 teach-control-label">参加人影日期：</label>
+                            <div class="col-sm-5">
+                                <input type="text" name="joinRenyingDate" class="form-control" id="txt_joinRenyingDate" >
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12">
+                            <label for="txt_name" class="col-sm-3 teach-control-label">省人影批准日期：</label>
+                            <div class="col-sm-5">
+                                <input type="text" name="provinceApproveRenyingDate" class="form-control" id="txt_provinceApproveRenyingDate" >
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12">
+                            <label for="txt_name" class="col-sm-3 teach-control-label">市人影批准日期：</label>
+                            <div class="col-sm-5">
+                                <input type="text" name="cityApproveRenyingDate" class="form-control" id="txt_cityApproveRenyingDate" >
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12">
+                            <label for="txt_name" class="col-sm-3 teach-control-label">家庭住址：</label>
+                            <div class="col-sm-5">
+                                <input type="text" name="address" class="form-control" id="txt_address" >
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            &nbsp;
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal"><span
+                            class="glyphicon glyphicon-remove" aria-hidden="true" th:text="取消"></span></button>
+                    <button type="button" id="btn_submit" class="btn btn-primary"><span class="glyphicon glyphicon-ok"
+                                                                                        aria-hidden="true"
+                                                                                        th:text="确定"></span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div></div>
+</body>
+<script th:inline="javascript">
+
+    var jqGrid = $("#jqGridList");
+    $(document).ready(function () {
+        var url = '/account/searchData?' + $('#searchForm').serialize() ;
+        jqGrid.jqGrid({
+            mtype: "GET",
+            styleUI : 'Bootstrap',
+            url: url,
+            datatype: "json",
+            ajaxGridOptions: { contentType: 'application/json;charset=utf-8' },
+            colModel: [
+                { label: 'id', name: 'id',key: true, align: 'center', width: $("#jqGridList").width()*0.15, hidden: true },
+                { label: '用户名', name: 'account', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '角色', name: 'type', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false,
+                    formatter: function(cellValue, options, rowObject) {
+
+                        if(cellValue == 0) return "系统管理员";
+                        else if(cellValue == 1) return "数据库管理员";
+                        else if(cellValue == 2) return "普通用户";
+                    }
+                },
+                { label: '实际姓名', name: 'name', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '手机号码', name: 'phone', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '办公室电话', name: 'officePhone', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '性别', name: 'sex', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '身份证号码', name: 'idNumber', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '参加人影日期', name: 'joinRenyingDate', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '省人影批准日期', name: 'provinceApproveRenyingDate', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '市人影批准日期', name: 'cityApproveRenyingDate', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '家庭住址', name: 'address', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '操作',name: 'Operation', frozen: true, align: 'center', sortable: false, width: $("#jqGridList").width()*0.25, formatter: function (cellValue, options, cellObject) {
+                    return '<a href="javascript:void(0);" onclick=\'modStatus("' + cellObject.id + '","1")\' >删除</a>';
+                }},
+            ],
+            viewrecords: true,
+            rowList: [5, 10, 15, 20, 30],
+            rowNum: 10,
+            pager: "#jqGridPager",
+            sortable: true,
+            sortorder: "asc",
+            width:$("#jqGrid_wrapper").width()-10,
+            height: $(window).height() * 0.4,
+//            rownumbers: true,
+//            rownumWidth:  $("#jqGridList").width()*0.1,
+//            gridComplete:function(){
+//                jqGrid.jqGrid('setLabel', 'rn', '序号', {
+//                    'text-align' : 'center'
+//                });
+//            }
+
+        });
+
+    });
+
+    flag = false;
+    function addAccount() {
+        // 初始化输入框中的数据
+        $("#txt_account").val("");
+        $("#txt_status").val("");
+        $("#txt_school").val("");
+        $("#txt_name").val("");
+        $("#txt_account-error").hide();
+
+        $("#myModalLabel").text("新增");
+        $('#myModal').modal();
+    }
+    
+    function checkAccount() {
+        var account = $('#txt_account').val();
+        $.ajax({
+            type: "GET",
+            url: "/account/checkAccount?account=" + account,
+            async: false,
+            success: function(data) {
+                if (data.isExist == "true")
+                {
+                    $("#txt_account-error").text("账号已存在").show();
+                    flag = false;
+                    return;
+                } else {
+                    $("#txt_account-error").hide();
+                    flag = true;
+                }
+            },
+            error: function(request) {
+                alert("Connection error");
+            }
+        });
+    }
+
+    $("#btn_submit").click(function (){
+        if ($("#myForm").valid()) {
+            if ( !flag) {
+                $("#txt_account-error").text("账号已存在").show();
+                return;
+            }
+
+            $.ajax({
+                type: "POST",
+                url: "/account/addAccount",
+                data:$('#myForm').serialize(),
+                async: false,
+                success: function(data) {
+                    if (data.message == "success")
+                    {
+                        BootstrapDialog.alert("操作成功");
+                        $('#myModal').modal('hide');
+                        var pageNo = $('#jqGrid').getGridParam('page');
+                        searchData(pageNo);
+                    }
+                    else {
+                        var jsonData = $.parseJSON(data);
+                        alert(jsonData.errorMsg);
+                    }
+                },
+                error: function(request) {
+                    alert("Connection error");
+                }
+            });
+        }
+    });
+
+    function searchData(pageNo) {
+        var url = '/account/searchData?' + $('#searchForm').serialize();
+        jqGrid.jqGrid('setGridParam', { page: pageNo,url: url, datatype: 'json'}).trigger("reloadGrid");
+
+    }
+    $("#txt_status").change(function () {
+        var selectVal = $("#txt_status").val();
+        if (selectVal != "1" && selectVal != "") {
+            $("#school_div").show();
+        } else {
+            $("#school_div").hide();
+            $("#txt_school").val("");
+        }
+    });
+
+    function modStatus(id,status) {
+        var msg = "确定关闭该账号";
+        if (status == 1) {
+            msg = "确定激活该账号";
+        }
+
+        BootstrapDialog.confirm(msg, function(result){
+            if(result) {
+                $.ajax({
+                    type: "POST",
+                    url: "/account/modStatus",
+                    data: {ids: id,status:status},
+                    async: false,
+                    success: function(data) {
+                        if (data.message == "success")
+                        {
+                            BootstrapDialog.alert("操作成功");
+                            var pageNo = $('#jqGrid').getGridParam('page');
+                            searchData(pageNo);
+                        }
+                        else {
+                            var jsonData = $.parseJSON(data);
+                            BootstrapDialog.alert(jsonData.errorMsg);
+                        }
+                    },
+                    error: function(request) {
+                        BootstrapDialog.alert("Connection error");
+                    }
+                });
+            }else {
+               return;
+            }
+        })
+    }
+</script>
+</html>

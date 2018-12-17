@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="fragments/head :: head"></head>
+<title>军创电子科技--教案管理</title>
+<body>
+<div th:replace="fragments/header :: header"></div>
+<div th:replace="fragments/menu :: menu"></div>
+<div class="col-sm-10 col-lg-10 main">
+    <div class="row">
+        <ul class="breadcrumb">
+            <li>教案管理</li>
+            <li><a href="javascript:history.back(-1);">查看教案列表</a></li>
+            <li class="active">查看教案详情</li>
+        </ul>
+    </div>
+    <div class="row" id="rowId">
+        <div class="col-lg-12">
+
+                <div class="teach-review-btns">
+                    <div class="col-sm-2">
+                        <shiro:hasPermission name="delTeachPlan">
+                        <button class="btn btn-primary" id="submitBtn" onclick="editTeachPlan();">
+                            编辑
+                        </button>
+                        </shiro:hasPermission>
+                    </div>
+                    <div class="col-sm-2">
+                        <button class="btn btn-primary" id="submitEditBtn" onclick="submitEdit();" style="display: none">确定</button>
+                    </div>
+                    <div class="col-sm-2">
+                        <button class="btn btn-default" id="cancelEditBtn" onclick="cancelEdit();" style="display: none">取消</button>
+                    </div>
+
+                </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <span>主要信息</span>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <form action="#" class="form-horizontal" role="form" id="searchForm">
+                            <input type="hidden" name="id" id="id" th:value="${teachPlan.id}">
+                            <div class="form-group col-xs-6">
+                                <label class="teach-control-label col-sm-3 control-label">名称：</label>
+                                <div class="col-sm-5">
+                                    <input type="text" name="name" class="form-control input-sm" id="txt_name" th:value="${teachPlan.name}" required disabled>
+                                </div>
+                            </div>
+                            <div class="form-group col-xs-6">
+                                <label class="teach-control-label col-sm-3 control-label">类别：</label>
+                                <div class="col-sm-5">
+                                    <select class='form-control' name="type" id="txt_type" required onchange="searchCourse()" disabled>
+                                        <option value="">请选择</option>
+                                        <option value="1" th:selected="${teachPlan.type == 1}">基础课程</option>
+                                        <option value="2" th:selected="${teachPlan.type == 2}">特色课程</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group col-xs-6">
+                                <label class="teach-control-label col-sm-3 control-label">课程：</label>
+                                <div class="col-sm-5">
+                                    <select class='form-control' name="courseId" id="txt_course" disabled required>
+                                        <option value="">请选择</option>
+                                        <option th:each="course : ${courses}" th:value="${course.id}" th:selected="${teachPlan.courseId == course.id}"
+                                                th:text="${course.text}">
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group col-xs-6">
+                                <label class="teach-control-label col-sm-3 control-label">场景：</label>
+                                <div class="col-sm-5">
+                                    <select class='form-control' name="sceneId" id="txt_scene" required disabled>
+                                        <option value="">请选择</option>
+                                        <option th:each="scene : ${scenes}" th:value="${scene.id}" th:selected="${teachPlan.sceneId == scene.id}"
+                                                th:text="${scene.text}">
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group col-xs-6">
+                                <label class="teach-control-label col-sm-3 control-label">主题：</label>
+                                <div class="col-sm-5">
+                                    <select class='form-control' name="themeId" id="txt_theme" required disabled>
+                                        <option value="">请选择</option>
+                                        <option th:each="theme : ${themes}" th:value="${theme.id}" th:selected="${teachPlan.themeId == theme.id}"
+                                                th:text="${theme.text}">
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <span>详细信息</span>
+                </div>
+                <div class="panel-body">
+                    <ul id="tabs">
+                        <li><a href="#" name="#tab1">课程概述</a></li>
+                        <li><a href="#" name="#tab2">课前准备</a></li>
+                        <li><a href="#" name="#tab3">课程内容</a></li>
+                        <li><a href="#" name="#tab4">PPT</a></li>
+                    </ul>
+
+                    <div id="content" style="min-height:240px">
+                        <div id="tab1">
+                            <div class="row">
+                                <div class="form-group col-xs-8">
+                                    <textarea class="center-textarea" id="summary" name="summary"
+                                              th:text="${teachPlan.summary}" disabled></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="tab2">
+                            <div class="row">
+                                <div class="form-group col-xs-9">
+                                    <textarea class="center-textarea" id="prepare" name="prepare"
+                                              th:text="${teachPlan.prepare}" disabled></textarea>
+                                </div>
+                                <div class="col-sm-12">
+                                    <div class="col-md-4">
+                                        <span>文件名称：</span>
+                                        <input id="prepareFileName" type="text" th:value="${teachPlan.prepareFileName}" disabled/>
+                                        <input type="hidden" id="prepareFilePath" name="prepareFilePath" th:value="${teachPlan.prepareFilePath}">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <form enctype="multipart/form-data" method="POST" action="/file/uploadFile" id="prepareFileForm" style="display: none">
+                                            <label for="prepareFile">
+                                                <input type="button" class="btn btn-default" value="选择文件" onclick="openFile('prepareFile')">
+                                            </label>
+                                            <input type="file" id="prepareFile" style="display: none" name="file"
+                                                   onchange="uploadFile('prepare','prepareFile','prepareFileForm')">
+                                        </form>
+                                        <form enctype="multipart/form-data" method="POST" action="/file/downloadFile" id="preparedownloadFileForm">
+                                            <input type="hidden" name="filePath" th:value="${teachPlan.prepareFilePath}">
+                                            <input type="hidden" name="fileName" th:value="${teachPlan.prepareFileName}">
+                                            <button th:disabled="${teachPlan.prepareFilePath==null || teachPlan.prepareFilePath=='' ? true:false}" class="btn btn-default">下载文件</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="tab3">
+                            <div id="div1" style="min-height:400px" th:utext="${teachPlan.content}">
+                            </div>
+                        </div>
+                        <div id="tab4">
+                            <div>
+                                <div class="col-md-4" >
+                                    <span>文件名称：</span>
+                                    <input id="pptFileName" type="text" th:value="${teachPlan.pptFileName}" disabled/>
+                                    <input type="hidden" id="pptFilePath" name="pptFilePath" th:value="${teachPlan.pptFilePath}">
+                                </div>
+                                <div class="col-md-2">
+                                    <form enctype="multipart/form-data" method="POST" action="/file/uploadFile" id="pptFileForm" style="display: none">
+                                        <label for="pptFile">
+                                            <input type="button" class="btn btn-default" value="选择文件" onclick="openFile('pptFile')">
+                                        </label>
+                                        <input type="file" id="pptFile" style="display: none" name="file"
+                                               onchange="uploadFile('ppt','pptFile','pptFileForm')">
+                                    </form>
+                                    <form enctype="multipart/form-data" method="POST" action="/file/downloadFile" id="pptDownloadFileForm">
+                                        <input type="hidden" name="filePath" th:value="${teachPlan.pptFilePath}">
+                                        <input type="hidden" name="fileName" th:value="${teachPlan.pptFileName}">
+                                        <button th:disabled="${teachPlan.pptFilePath==null || teachPlan.pptFilePath=='' ? true:false}" class="btn btn-default">下载文件</button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div id="pptHtml" th:utext="${pptHtml}"></div>
+                            <!--<button class="btn btn-default" onclick="clearFile('pptFileName','pptFilePath');">-->
+                            <!--清除文件-->
+                            <!--</button>-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script th:src="@{/js/tab/tabulous.js}"></script>
+<script th:src="@{/js/edit/wangEditor.min.js}"></script>
+<script th:inline="javascript">
+
+        editInit();
+        var editor = new wangEditor('div1');
+        // 禁用
+        editor.disable();
+
+    function uploadFile(type, fileElementId, formId) {
+
+        var file = document.getElementById(fileElementId).files[0];
+        if (file == 'undefined') {
+            return;
+        }
+        var size = file.size;
+        if (size / (1024 * 1024) > 10.0) {
+            BootstrapDialog.alert("文件大小限制为10M以下！");
+            return;
+        }
+        var fileName = file.name;
+        var suffix = fileName.substr(fileName.lastIndexOf(".") + 1, fileName.length);
+        if (type == "ppt") {
+            if (suffix != "ppt" && suffix != "pptx") {
+                BootstrapDialog.alert("请上传PPT格式的文件");
+                return;
+            }
+            $("#pptFileName").val(fileName);
+        } else {
+            $("#prepareFileName").val(fileName);
+        }
+        var formData = new FormData($('#' + formId)[0]);
+        formData.append("type", type);
+        $.ajax({
+            url: $("#" + formId).attr("action"),
+            type: 'POST',
+            dataType: 'json', //返回值类型，一般设置为json、application/json
+            data: formData, //传递参数到服务器
+//            async: false,
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function (data, status) {
+                if (data.message == "error") {
+                    BootstrapDialog.alert("文件处理失败!");
+                    return;
+                }
+//                else if (data.message == "fileError") {
+//                    BootstrapDialog.alert("请选择文件!");
+//                    return;
+//                }
+
+                var filePath = data.filePath;
+                if (type == "ppt") {
+                    $("#pptFilePath").val(filePath);
+                } else {
+                    $("#prepareFilePath").val(filePath);
+                }
+            },
+            error: function (data, status, e) {
+                BootstrapDialog.alert("错误：上传组件错误，请检察网络!");
+            },beforeSend: function(){
+                $("#rowId").append('<div class="loadingWrap"></div>');
+            },
+            complete: function(){
+                $(".loadingWrap").remove();
+            }
+        });
+    }
+    function editInit() {
+        var editor = new wangEditor('div1');
+        editor.config.uploadImgUrl = '/file/uploadFile?type=content';
+        editor.config.uploadImgFileName = 'file';
+        editor.config.hideLinkImg = true;
+
+        // 普通的自定义菜单
+        editor.config.menus = [
+            'source',
+            '|',
+            'bold',
+            'underline',
+            'italic',
+            'strikethrough',
+            'eraser',
+            'forecolor',
+            'bgcolor',
+            '|',
+            'quote',
+            'fontfamily',
+            'fontsize',
+            'head',
+            'unorderlist',
+            'orderlist',
+            'alignleft',
+            'aligncenter',
+            'alignright',
+            '|',
+            'link',
+            'unlink',
+            'table',
+            '|',
+            'img',
+            '|',
+            'undo',
+            'redo',
+            'fullscreen'
+        ];
+
+        editor.config.uploadImgFns.onload = function (resultText, xhr) {
+            // resultText 服务器端返回的text
+            // xhr 是 xmlHttpRequest 对象，IE8、9中不支持
+            var data = $.parseJSON(resultText);
+            // 上传图片时，已经将图片的名字存在 editor.uploadImgOriginalName
+            var originalName = editor.uploadImgOriginalName || '';
+
+            // 如果 resultText 是图片的url地址，可以这样插入图片：
+//            editor.command(null, 'insertHtml', '<img src="' + data.filePath + '" alt="' + originalName + '" style="max-width:100%;"/>');
+            // 如果不想要 img 的 max-width 样式，也可以这样插入：
+            editor.command(null, 'InsertImage', data.filePath);
+        };
+
+        editor.create();
+        $("#div1").height("auto");
+    }
+
+    function openFile(fileId) {
+        $("#" + fileId).click();
+    }
+    function searchCourse() {
+        var type = $("#txt_type").val();
+        $("#txt_course option").remove();
+        $("#txt_course").append("<option value=''>请选择</option>");
+
+        if (type == "") {
+            return;
+        }
+
+        $.ajax({
+            type: "GET",
+            url: "/teachPlan/searchCourse?type=" + type,
+            async: false,
+            success: function(data) {
+                if (data.message == "success")
+                {
+                    var courses = data.courses;
+                    $.each(courses, function (index, item) {
+                        var id = courses[index].id;
+                        var text = courses[index].text;
+                        $("#txt_course").append("<option value='"+id+"'>"+text+"</option>");
+                    });
+
+                }
+                else {
+                    BootstrapDialog.alert(data.message);
+                }
+            },
+            error: function(request) {
+                BootstrapDialog.alert("Connection error");
+            }
+        });
+    }
+
+    function submitEdit(){
+
+        if ($("#searchForm").valid()) {
+            var data = {
+                id:$("#id").val(),
+                summary:$("#summary").val().trim(),
+                prepare:$("#prepare").val().trim(),
+                prepareFilePath:$("#prepareFilePath").val().trim(),
+                prepareFileName:$("#prepareFileName").val().trim(),
+                content:$("#div1").html().trim(),
+                pptFilePath:$("#pptFilePath").val().trim(),
+                pptFileName:$("#pptFileName").val().trim(),
+
+                name:$("#txt_name").val().trim(),
+                type:$("#txt_type").val().trim(),
+                courseId:$("#txt_course").val().trim(),
+                sceneId:$("#txt_scene").val().trim(),
+                themeId:$("#txt_theme").val().trim(),
+            }
+            $.ajax({
+                type: "POST",
+                url: "/teachPlan/modTeachPlan",
+                data: data,
+                async: false,
+                success: function(data) {
+                    if (data.message == "success")
+                    {
+                        BootstrapDialog.alert("操作成功");
+                        window.location.reload();
+                    }
+                    else {
+                        BootstrapDialog.alert(data.message);
+                    }
+                },
+                error: function(request) {
+                    BootstrapDialog.alert("Connection error");
+                }
+            });
+        }
+    }
+    
+    function editTeachPlan() {
+        $("#submitBtn").hide();
+        $("#submitEditBtn").show();
+        $("#cancelEditBtn").show();
+        $("#txt_name").attr("disabled",false);
+        $("#txt_type").attr("disabled",false);
+        $("#txt_course").attr("disabled",false);
+        $("#txt_scene").attr("disabled",false);
+        $("#txt_theme").attr("disabled",false);
+
+        $("#summary").attr("disabled",false);
+        $("#prepare").attr("disabled",false);
+        $("#preparedownloadFileForm").hide();
+        $("#prepareFileForm").show();
+
+        $("#pptHtml").hide();
+        $("#pptDownloadFileForm").hide();
+        $("#pptFileForm").show();
+
+
+
+
+        var editor = new wangEditor('div1');
+        editor.enable();
+
+    }
+
+    function cancelEdit() {
+        window.location.reload();
+    }
+</script>
+</html>

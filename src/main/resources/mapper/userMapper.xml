@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teachingplan.console.dao.user.UserDao">
+
+    <resultMap id="Account" type="com.teachingplan.console.beans.user.Account">
+        <result property="officePhone" column="office_phone"></result>
+        <result property="idNumber" column="id_number"></result>
+        <result property="joinRenyingDate" column="join_renying_date"></result>
+        <result property="provinceApproveRenyingDate" column="province_approve_renying_date"></result>
+        <result property="cityApproveRenyingDate" column="city_approve_renying_date"></result>
+        <result property="modDefault" column="mod_default"></result>
+    </resultMap>
+    <resultMap id="Teacher" type="com.teachingplan.console.beans.user.Teacher">
+        <result property="schoolId" column="school_id"></result>
+    </resultMap>
+    <resultMap id="Student" type="com.teachingplan.console.beans.user.Student">
+        <result property="schoolId" column="school_id"></result>
+        <result property="parentPhone" column="parent_phone"></result>
+    </resultMap>
+    <resultMap id="School" type="com.teachingplan.console.beans.user.School">
+        <result property="schoolId" column="school_id"></result>
+        <result property="accountId" column="account_id"></result>
+    </resultMap>
+    <resultMap id="Sign" type="com.teachingplan.console.beans.user.Sign">
+        <result property="studentAccount" column="student_account"></result>
+        <result property="schoolId" column="school_id"></result>
+        <result property="schoolName" column="school_name"></result>
+        <result property="classesName" column="classes_name"></result>
+        <result property="studentId" column="student_id"></result>
+        <result property="studentName" column="student_name"></result>
+        <result property="operaterId" column="operater_id"></result>
+        <result property="operaterName" column="operater_name"></result>
+        <result property="signInDate" column="sign_in_date"></result>
+    </resultMap>
+
+    <resultMap id="Code" type="com.teachingplan.console.beans.user.Code">
+        <result property="expireTime" column="expire_time"></result>
+    </resultMap>
+
+    <resultMap id="User" type="com.teachingplan.console.beans.user.User">
+    </resultMap>
+
+    <resultMap id="Role" type="com.teachingplan.console.beans.user.Role">
+    </resultMap>
+    <resultMap id="Permission" type="com.teachingplan.console.beans.user.Permission">
+    </resultMap>
+
+    <select id="findAccount" parameterType="String" resultMap="Account">
+        select * from account_t where account=#{value}
+    </select>
+
+    <select id="findRolesByAccountId" parameterType="Integer" resultMap="Role">
+        select r.id,r.name from role_t r left join account_role_t ar on r.id = ar.role_id where ar.account_id = #{value}
+    </select>
+
+    <select id="findPermissionsByAccountId" parameterType="Integer" resultMap="Permission">
+        SELECT p.* from account_role_t ar
+        left join  role_permission_t rp  on ar.role_id=rp.role_id
+        left join  permission_t p on p.id = rp.permission_id
+        where ar.account_id = #{value}
+    </select>
+
+    <select id="getAllSchools"  resultMap="User">
+        SELECT * from school_t where school_id is null
+    </select>
+
+    <select id="getSchoolIdByName" parameterType="String"  resultType="String">
+        select id from school_t where name=#{value} ORDER BY id limit 1
+    </select>
+
+    <select id="getSchoolIdByAccount" parameterType="String"  resultMap="School">
+        select * from school_t where account_id = (select id from account_t where account=#{value})
+    </select>
+
+    <select id="getSchoolById" parameterType="int"  resultMap="School">
+        select * from school_t where id = #{value}
+    </select>
+
+    <select id="getTeacherById" parameterType="int"  resultMap="Teacher">
+        select * from teacher_v where id=#{value}
+    </select>
+    <select id="getStudentById" parameterType="int"  resultMap="Student">
+        select * from student_v where id=#{value}
+    </select>
+    <select id="getStudentByAccount" parameterType="String"  resultMap="Student">
+        select * from student_t where account_id=(select id from account_t where account=#{value})
+    </select>
+    <select id="getTeacherByAccount" parameterType="String"  resultMap="Teacher">
+        select * from teacher_t where account_id=(select id from account_t where account=#{value})
+    </select>
+
+    <update id="modAccountStatus" >
+        update account_t set status =#{status}
+        where id in
+        <foreach collection="ids" index="index" item="item" separator="," open="(" close=")">
+            #{item}
+        </foreach>
+    </update>
+    <update id="modTeacher" parameterType="com.teachingplan.console.beans.user.Teacher">
+        update teacher_t set name =#{name}, remark=#{remark} where id = #{id}
+    </update>
+    <update id="modStudent" parameterType="com.teachingplan.console.beans.user.Student">
+        update student_t
+        <set>
+            <if test="name != null and name != '' ">
+                name =#{name},
+            </if>
+            <if test="parentPhone != null and parentPhone != '' ">
+                parent_phone =#{parentPhone},
+            </if>
+            <if test="birthday != null and birthday != '' ">
+                birthday =#{birthday},
+            </if>
+            <if test="sign != null and sign != '' ">
+                sign =#{sign},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+    <delete id="delTeacher" parameterType="int">
+        delete from teacher_t where id =#{value}
+    </delete>
+    <delete id="delStudent" parameterType="int">
+        delete from student_t where id =#{value}
+    </delete>
+    <delete id="delAccount" parameterType="int">
+        delete from account_t where id =#{value}
+    </delete>
+    <delete id="delAccountRole" parameterType="int">
+        delete from account_role_t where account_id =#{value}
+    </delete>
+
+    <delete id="delAllAccount">
+        delete from account_role_t;
+        DELETE from school_t;
+        DELETE FROM student_t;
+        DELETE FROM teacher_t;
+        DELETE FROM account_t;
+    </delete>
+
+    <!--教师过滤学生信息-->
+    <select id="getStuOfTeacher" parameterType="Map"  resultMap="Student">
+        select s.* ,a.id as teachId,group_concat(`class`.`name`) AS `classes`,
+        group_concat(`class`.`id`)  AS `classesId`,sch.`name` as schoolName,a.`status`,a.account
+        from student_t s LEFT JOIN user_classes_t uc on s.account_id=uc.account_id
+        inner join  account_t a on a.id=s.account_id
+        inner JOIN classes_t class on class.id=uc.classes_id
+        inner JOIN school_t sch on s.school_id=sch.id
+        INNER JOIN
+        (select t.account_id as teacherAccId, c.id as classId,school.id as schoolId from teacher_t t LEFT JOIN user_classes_t uct on t.account_id=uct.account_id
+        inner JOIN account_t acc on acc.id=t.account_id
+        inner JOIN school_t school on school.id=t.school_id
+        inner JOIN classes_t c on c.id=uct.classes_id where acc.type=2 and acc.id=#{accountId})v
+        on v.classId=uc.classes_id and v.schoolId=s.school_id
+        <where>
+            <if test="name != null and name != '' ">
+                and s.name like "%"#{name}"%"
+            </if>
+            <if test="classes != null and classes != '' ">
+                and class.name like "%"#{classes}"%"
+            </if>
+            <if test="schoolName != null and schoolName != '' ">
+                and sch.name like "%"#{schoolName}"%"
+            </if>
+            <if test="status != null and status != '' ">
+                and a.status = #{status}
+            </if>
+            and a.type=3
+        </where>
+         GROUP BY s.id
+        limit #{beginIndex}, #{pageSize}
+    </select>
+
+    <select id="getStuCountOfTeacher" parameterType="Map"  resultType="int">
+        select count(*) from (select s.id
+        from student_t s LEFT JOIN user_classes_t uc on s.account_id=uc.account_id
+        inner join  account_t a on a.id=s.account_id
+        inner JOIN classes_t class on class.id=uc.classes_id
+        inner JOIN school_t sch on s.school_id=sch.id
+        INNER JOIN
+        (select t.account_id as teacherAccId, c.id as classId,school.id as schoolId from teacher_t t LEFT JOIN user_classes_t uct on t.account_id=uct.account_id
+        inner JOIN account_t acc on acc.id=t.account_id
+        inner JOIN school_t school on school.id=t.school_id
+        inner JOIN classes_t c on c.id=uct.classes_id where acc.type=2 and acc.id=#{accountId})v
+        on v.classId=uc.classes_id and v.schoolId=s.school_id
+        <where>
+            <if test="name != null and name != '' ">
+                and s.name like "%"#{name}"%"
+            </if>
+            <if test="classes != null and classes != '' ">
+                and class.name like "%"#{classes}"%"
+            </if>
+            <if test="schoolName != null and schoolName != '' ">
+                and sch.name like "%"#{schoolName}"%"
+            </if>
+            <if test="status != null and status != '' ">
+                and a.status = #{status}
+            </if>
+            and a.type=3
+        </where>
+        GROUP BY s.id) tt
+    </select>
+
+
+    <update id="clearSignIn">
+        update student_t set sign =0
+    </update>
+
+    <!--查看考勤信息-->
+    <select id="getSignIns" parameterType="Map"  resultMap="Sign">
+        select * from sign_in_t si
+        <where>
+            <if test="teacherAccId != null and teacherAccId != '' ">
+                si.student_id in
+                (
+                select DISTINCT s.id
+                from student_t s LEFT JOIN user_classes_t uc on s.account_id=uc.account_id
+                inner join  account_t a on a.id=s.account_id
+                inner JOIN classes_t class on class.id=uc.classes_id
+                inner JOIN school_t sch on s.school_id=sch.id
+                INNER JOIN
+                (select t.account_id as teacherAccId, c.id as classId,school.id as schoolId from teacher_t t LEFT JOIN user_classes_t uct on t.account_id=uct.account_id
+                inner JOIN account_t acc on acc.id=t.account_id
+                inner JOIN school_t school on school.id=t.school_id
+                inner JOIN classes_t c on c.id=uct.classes_id where acc.type=2 and acc.id=#{teacherAccId})v
+                on v.classId=uc.classes_id and v.schoolId=s.school_id
+                and a.type=3
+                GROUP BY s.id
+                )
+            </if>
+            <if test="schoolId != null and schoolId != '' ">
+                and school_id=#{schoolId}
+            </if>
+
+            <if test="name != null and name != '' ">
+                and si.student_name like "%"#{name}"%"
+            </if>
+            <if test="classes != null and classes != '' ">
+                and si.classes_name like "%"#{classes}"%"
+            </if>
+            <if test="schoolName != null and schoolName != '' ">
+                and si.school_name like "%"#{schoolName}"%"
+            </if>
+            <if test="account != null and account != '' ">
+                and si.student_account = #{account}
+            </if>
+            <if test="beginDate != null and beginDate != '' ">
+                and si.sign_in_date &gt;= #{beginDate}
+            </if>
+            <if test="endDate != null and endDate != '' ">
+                and si.sign_in_date &lt;= #{endDate}
+            </if>
+        </where>
+        limit #{beginIndex}, #{pageSize}
+    </select>
+
+    <select id="getSignInsCount" parameterType="Map"  resultType="int">
+        select count(*) from sign_in_t si
+        <where>
+            <if test="teacherAccId != null and teacherAccId != '' ">
+                si.student_id in
+                (
+                select DISTINCT s.id
+                from student_t s LEFT JOIN user_classes_t uc on s.account_id=uc.account_id
+                inner join  account_t a on a.id=s.account_id
+                inner JOIN classes_t class on class.id=uc.classes_id
+                inner JOIN school_t sch on s.school_id=sch.id
+                INNER JOIN
+                (select t.account_id as teacherAccId, c.id as classId,school.id as schoolId from teacher_t t LEFT JOIN user_classes_t uct on t.account_id=uct.account_id
+                inner JOIN account_t acc on acc.id=t.account_id
+                inner JOIN school_t school on school.id=t.school_id
+                inner JOIN classes_t c on c.id=uct.classes_id where acc.type=2 and acc.id=#{teacherAccId})v
+                on v.classId=uc.classes_id and v.schoolId=s.school_id
+                and a.type=3
+                GROUP BY s.id
+                )
+            </if>
+            <if test="schoolId != null and schoolId != '' ">
+                and school_id=#{schoolId}
+            </if>
+
+            <if test="name != null and name != '' ">
+                and si.student_name like "%"#{name}"%"
+            </if>
+            <if test="classes != null and classes != '' ">
+                and si.classes_name like "%"#{classes}"%"
+            </if>
+            <if test="schoolName != null and schoolName != '' ">
+                and si.school_name like "%"#{schoolName}"%"
+            </if>
+            <if test="account != null and account != '' ">
+                and si.student_account = #{account}
+            </if>
+            <if test="beginDate != null and beginDate != '' ">
+                and si.sign_in_date &gt;= #{beginDate}
+            </if>
+            <if test="endDate != null and endDate != '' ">
+                and si.sign_in_date &lt;= #{endDate}
+            </if>
+        </where>
+    </select>
+
+    <select id="getCodeByAccount" parameterType="Map"  resultMap="Code">
+        select * from code_t where account=#{value} ORDER by id desc limit 1
+    </select>
+
+    <update id="modPassword" >
+        update account_t set password =#{password}, mod_default=1 where account=#{account}
+    </update>
+    <update id="setCodeExpire" >
+        update code_t set expire_time ='2018-01-01' where account=#{account}
+    </update>
+
+    <select id="getTeacherMsg" parameterType="Map"  resultType="String">
+        select content from message_t where student_id=#{value} ORDER by id desc limit 1
+    </select>
+
+    <!--可放别处-->
+    <select id="getVersion"  resultType="Map">
+        select * from version_t ORDER by id desc limit 1
+    </select>
+</mapper>

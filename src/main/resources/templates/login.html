@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="fragments/head :: head"></head>
+<title>军创电子科技--登录</title>
+<body>
+<div th:replace="fragments/header :: header"></div>
+<div class="col-xs-10 col-xs-offset-1 col-sm-8 col-sm-offset-2 col-md-4 col-md-offset-4">
+    <div class="login-panel panel panel-default">
+        <div class="panel-heading">军创电子科技--欢迎使用</div>
+        <div class="panel-body">
+            <form id="loginForm" action="/login" method="post">
+                <div class="form-group col-xs-12">
+                    <div class="form-group">
+                        <label for="cardNumber" class="col-sm-4 teach-control-label">账号：</label>
+                        <div class="col-sm-5">
+                            <input type="text" class="form-control" id="cardNumber" name="account" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group col-xs-12">
+                    <div class="form-group" style="margin-top: 5px">
+                        <label for="password" class="col-sm-4 teach-control-label">密码：</label>
+                        <div class="col-sm-5">
+                            <input type="password" class="form-control"  id="password" name="password" required>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" id="loginBtn" style="margin-left: 45%" class="btn btn-primary">登录</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+<script th:inline="javascript">
+    $(document).ready(function () {
+
+        $("#loginBtn").click(function () {
+            if ($("#loginForm").valid()) {
+                var type = $("#ex_re_type_txt_input").val();
+                var popType = $("#pop_type").val();
+                $.ajax({
+                    type: "POST",
+                    url: $("#loginForm").attr("action"),
+                    data: $('#loginForm').serialize(),
+                    async: false,
+                    success: function (data) {
+                        if (data.message == "success") {
+                            window.location.href = "/";
+                        } else if (data.message == "modDefault") {
+                            window.location.href = "/user/modPassword";
+                        }
+                        else {
+                            BootstrapDialog.alert(data.message);
+                        }
+                    },
+                    error: function (request) {
+                        BootstrapDialog.alert("Connection error");
+                    }
+                });
+            }
+        });
+
+        $(document).keyup(function(event){
+            if(event.keyCode ==13){
+                $("#loginBtn").trigger("click");
+            }
+        });
+    });
+</script>
+</html>

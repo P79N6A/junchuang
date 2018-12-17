@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teachingplan.console.dao.menu.MenuDao">
+
+    <resultMap id="Menu" type="com.teachingplan.console.beans.menu.Menu">
+        <id property="id" column="id"></id>
+        <result property="roles" column="role_ids"></result>
+        <result property="parentId" column="parent_id"></result>
+    </resultMap>
+
+    <select id="getMenusByAccount" parameterType="String" resultMap="Menu">
+        select * from menu_t where parent_id=0
+        and FIND_IN_SET(
+          (select role_id from account_role_t where account_id=(select id from account_t where account=#{value})
+        ), role_ids)
+    </select>
+
+    <select id="getChildMenus" parameterType="Map" resultMap="Menu">
+        select * from menu_t  where parent_id= #{menuId}
+        and FIND_IN_SET(
+          (select role_id from account_role_t where account_id=(select id from account_t where account=#{account})
+        ), role_ids)
+    </select>
+
+</mapper>

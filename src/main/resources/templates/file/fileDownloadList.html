@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="fragments/head :: head"></head>
+<title>军创电子科技--文件管理</title>
+<body>
+<div th:replace="fragments/header :: header"></div>
+<div th:replace="fragments/menu :: menu"></div>
+<div class="col-sm-10 col-lg-10 main">
+    <div class="row">
+        <ul class="breadcrumb">
+            <li>文件管理</li>
+            <li class="active">查看文件列表</li>
+        </ul>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <span>查询条件</span>
+                </div>
+                <div class="panel-body">
+
+                    <form action="#" class="form-horizontal" role="form" id="searchForm">
+                        <div class="row">
+                            <div class="form-group col-xs-4">
+                                <label class="teach-control-label col-sm-3 control-label">类别：</label>
+                                <div class="col-sm-5">
+                                    <select class='form-control' name="type" id="type" onchange="searchCategory('type','subType')">
+                                        <option value="">所有</option>
+                                        <option value="1">招生</option>
+                                        <option value="2">教学</option>
+                                        <option value="3">管理</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group col-xs-4" id="sub_type">
+                                <label class="teach-control-label col-sm-3 control-label">子类别：</label>
+                                <div class="col-sm-5">
+                                    <select class='form-control' name="subTypeId" id="subType" disabled>
+                                        <option value="">请选择</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group col-xs-4">
+                                <label class="teach-control-label col-sm-3 control-label">文件名称：</label>
+                                <div class="col-sm-5">
+                                    <input type="text" name="name" class="form-control input-sm" id="name">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="teach-review-btns  col-md-12">
+                        <div class="col-sm-2">
+                            <button class="btn btn-primary" onclick="searchData();">查询</button>
+                        </div>
+                        <shiro:hasPermission name="addFileDownload">
+                            <div class="col-sm-2">
+                                <button class="btn btn-primary" onclick="addFileDownload();">添加</button>
+                            </div>
+                            <input type="hidden" value="true" id="hasPermission">
+                        </shiro:hasPermission>
+                        <shiro:hasPermission name="allotFileDownload">
+                            <div class="col-sm-2">
+                                <button class="btn btn-primary" onclick="allotFileDownload();">分配文件</button>
+                            </div>
+                        </shiro:hasPermission>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <span>查询结果</span>
+                </div>
+                <div class="panel-body">
+                    <div id="jqGrid_wrapper">
+                        <table id="jqGridList"></table>
+                        <div id="jqGridPager"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 分配文件窗口 -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">分配文件</h4>
+                </div>
+                <div class="modal-body">
+
+                    <form action="/fileDownload/allotFileDownload" id="myForm" class="form-horizontal" role="form">
+                        <div class="form-group col-xs-12">
+                            <label for="txt_type" class="col-sm-3 teach-control-label">类型：</label>
+                            <div class="col-sm-5">
+                                <select class='form-control' name="type" id="txt_type" onchange="showAccount()" required>
+                                    <option value="">请选择</option>
+                                    <option th:if="${session.account.type == '0'}" value="1">学校</option>
+                                    <option value="2">教师</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12">
+                            <label for="txt_school" class="col-sm-3 teach-control-label">学校：</label>
+                            <div class="col-sm-5">
+                                <select class='form-control' name="schoolId" id="txt_school" required th:disabled="${session.account.type == '0'? 'false':'true'}">
+                                    <option value="">请选择</option>
+                                    <option th:each="school : ${schools}" th:value="${school.id}" th:selected="${session.account.type == '1'}"
+                                            th:text="${school.name}">
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12" id="account_div" style="display: none">
+                            <label for="txt_account" class="col-sm-3 teach-control-label">教师账号：</label>
+                            <div class="col-sm-5">
+                                <input type="text" name="account" class="form-control" id="txt_account" required >
+                                <label id="txt_account-error" class="error" for="txt_account"></label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            &nbsp;
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal"><span
+                            class="glyphicon glyphicon-remove" aria-hidden="true" th:text="取消"></span></button>
+                    <button type="button" id="btn_submit" class="btn btn-primary"><span class="glyphicon glyphicon-ok"
+                                                                                        aria-hidden="true"
+                                                                                        th:text="确定"></span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加窗口 -->
+    <div class="modal fade" id="myaddModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myaddModalLabel">新增</h4>
+                </div>
+                <div class="modal-body">
+
+                    <form action="#" id="myaddForm" class="form-horizontal" role="form">
+                        <input type="hidden" id="txt_add_filePath" name="filePath">
+                        <input type="hidden" id="fileName" name="fileName">
+                        <input type="hidden" id="id" name="id" value="0">
+                        <div class="form-group col-xs-12">
+                            <label for="txt_add_name" class="col-sm-3 teach-control-label">名称：</label>
+                            <div class="col-sm-5">
+                                <input type="text" name="name" class="form-control" id="txt_add_name" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group col-xs-12">
+                            <label for="txt_add_type" class="col-sm-3 teach-control-label">类别：</label>
+                            <div class="col-sm-5">
+                                <select class='form-control' name="type" id="txt_add_type" required onchange="searchCategory('txt_add_type','txt_add_subType')">
+                                    <option value="">请选择</option>
+                                    <option value="1">招生</option>
+                                    <option value="2">教学</option>
+                                    <option value="3">管理</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12">
+                            <label for="txt_add_subType" class="col-sm-3 teach-control-label">子类别：</label>
+                            <div class="col-sm-5">
+                                <select class='form-control' name="subTypeId" id="txt_add_subType" required >
+                                    <option value="">请选择</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12">
+                            <label for="txt_add_description" class="col-sm-3 teach-control-label">描述：</label>
+                            <div class="col-sm-5">
+                                <textarea type="text" name="description" class="form-control" id="txt_add_description" required></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12">
+                            <label for="txt_add_fileName" class="col-sm-3 teach-control-label">选择文件：</label>
+                            <div class="col-sm-5">
+                                <input type="text" class="form-control" id="txt_add_fileName" required disabled>
+                            </div>
+                            <label for="file">
+                                <input type="button" class="btn btn-default" value="选择文件" onclick="openFile('file')">
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            &nbsp;
+                        </div>
+                    </form>
+                    <form enctype="multipart/form-data" method="POST" action="/file/uploadFile" id="fileForm" style="display: none">
+                        <input type="file" id="file" style="display: none" name="file"
+                               onchange="uploadFile()">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal"><span
+                            class="glyphicon glyphicon-remove" aria-hidden="true" th:text="取消"></span></button>
+                    <button type="button" id="btn_add_submit" class="btn btn-primary"><span class="glyphicon glyphicon-ok"
+                                                                                        aria-hidden="true"
+                                                                                        th:text="确定"></span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div></div>
+</body>
+<script th:inline="javascript">
+
+    var jqGrid = $("#jqGridList");
+    $(document).ready(function () {
+
+        var url = '/fileDownload/searchData?' + $('#searchForm').serialize() ;
+        jqGrid.jqGrid({
+            mtype: "GET",
+            styleUI : 'Bootstrap',
+            url: url,
+            datatype: "json",
+            ajaxGridOptions: { contentType: 'application/json;charset=utf-8' },
+            colModel: [
+                { label: 'id', name: 'id',key: true, align: 'center', width: $("#jqGridList").width()*0.15, hidden: true },
+                { label: 'fileName', name: 'fileName',align: 'center', width: $("#jqGridList").width()*0.15, hidden: true },
+                { label: 'filePath', name: 'filePath',align: 'center', width: $("#jqGridList").width()*0.15, hidden: true },
+                { label: '文件名称', name: 'name', title:'aaaaaa', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '类型', name: 'type', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false,
+                    formatter: function(cellValue, options, rowObject) {
+
+                        if(cellValue == 1) return "招生";
+                        else if(cellValue == 2) return "教学";
+                        else if(cellValue == 3) return "管理";
+                    }
+                },
+                { label: '描述', name: 'description', align: 'center', width: $("#jqGridList").width()*0.25,sortable: false},
+                { label: '子类别', name: 'subTypeName', align: 'center', width: $("#jqGridList").width()*0.25,sortable: false},
+                { label: '操作',name: 'Operation', frozen: true, align: 'center', sortable: false, width: $("#jqGridList").width()*0.25},
+            ],
+            viewrecords: true,
+            rowList: [5, 10, 15, 20, 30],
+            rowNum: 10,
+            pager: "#jqGridPager",
+            sortable: true,
+            sortorder: "asc",
+            width:$("#jqGrid_wrapper").width()-10,
+            height: $(window).height() * 0.4,
+            multiselect: true,//复选框
+//            rownumbers: true,
+//            rownumWidth:  $("#jqGridList").width()*0.1,
+            gridComplete: function () {
+                var hasPermission = $("#hasPermission").val();
+
+                var ids = jqGrid.getDataIDs();
+
+                for (var i = 0; i < ids.length; i++) {
+                    var gridData = jqGrid.jqGrid("getRowData", ids[i]);
+                    var data = '<a href="javascript:void(0);" onclick=\'editFileDownload("' + gridData.id + '","' + gridData.name + '")\' >编辑</a>' +
+                        '<a href="javascript:void(0);" style="margin-left: 8px" onclick=\'delFileDownload("' + gridData.id + '")\' >删除</a>';
+                    if (hasPermission == "true") {
+                        jqGrid.jqGrid('setCell', ids[i], 'Operation', data);
+                    }
+                    var nameData = '<a href="/file/downloadFile?filePath='+ gridData.filePath + '&fileName='+ gridData.fileName+'" title="点击下载">'+gridData.name+'</a>'
+                    jqGrid.jqGrid('setCell', ids[i], 'name', nameData);
+                }
+            }
+
+        });
+
+    });
+
+
+    function searchData(pageNo) {
+        var url = '/fileDownload/searchData?' + $('#searchForm').serialize();
+        jqGrid.jqGrid('setGridParam', { page: pageNo,url: url, datatype: 'json'}).trigger("reloadGrid");
+
+    }
+
+
+    $('#datetimepicker').datetimepicker({
+        format: 'yyyy-mm-dd',
+        minView: "month",//设置只显示到月份
+        autoclose:true,//选中关闭
+        locale: moment.locale('zh-cn')
+    });
+
+    function editFileDownload(fileDownloadId,fileDownloadName) {
+
+        var rowData = jqGrid.jqGrid('getRowData',fileDownloadId);
+        // 初始化输入框中的数据
+        $("#id").val(rowData.id);
+        $("#txt_add_name").val(fileDownloadName);
+        $('#txt_add_type option').filter(function(){return $(this).text()== rowData.type ;}).attr("selected",true);
+        searchCategory('txt_add_type','txt_add_subType');
+        $('#txt_add_subType option').filter(function(){return $(this).text()== rowData.subTypeName ;}).attr("selected",true);
+        $("#txt_add_description").val(rowData.description);
+        $("#txt_add_filePath").val(rowData.filePath);
+        $("#txt_add_fileName").val(rowData.fileName);
+        $("#fileName").val(rowData.fileName);
+
+        $("#myaddForm").attr("action", "/fileDownload/modFileDownload");
+        $("#myaddModalLabel").text("编辑");
+        $('#myaddModal').modal();
+    }
+
+    function delTeachPlan(id) {
+        BootstrapDialog.confirm("确定删除该教案？", function(result){
+            if(result) {
+                $.ajax({
+                    type: "GET",
+                    url: "/teachPlan/delTeachPlan?id=" + id,
+                    async: false,
+                    success: function(data) {
+                        if (data.msg == "success")
+                        {
+                            BootstrapDialog.alert("操作成功");
+                            var pageNo = $('#jqGrid').getGridParam('page');
+                            searchData(pageNo);
+                        }
+                        else {
+                            var jsonData = $.parseJSON(data);
+                            BootstrapDialog.alert(jsonData.errorMsg);
+                        }
+                    },
+                    error: function(request) {
+                        BootstrapDialog.alert("Connection error");
+                    }
+                });
+            }else {
+                return;
+            }
+        })
+
+    }
+
+    function allotFileDownload() {
+        var ids =jqGrid.jqGrid("getGridParam","selarrrow");
+        if (ids == "") {
+            BootstrapDialog.alert("请选择要分配的文件");
+            return;
+        }
+
+        // 初始化输入框中的数据
+        $("#txt_account").val("");
+        $("#txt_type").val("");
+        $("#account_div").hide();
+        $("#txt_account-error").hide();
+
+        $('#myModal').modal();
+    }
+
+    $("#btn_submit").click(function (){
+        if ($("#myForm").valid()) {
+
+            var ids =jqGrid.jqGrid("getGridParam","selarrrow");
+            var data ={
+                schoolId: $("#txt_school").val(),
+                account: $("#txt_account").val(),
+                type: $("#txt_type").val(),
+                fileDownloads:ids.toString(),
+            }
+
+            $.ajax({
+                type: "POST",
+                url: $("#myForm").attr("action"),
+                data:data,
+                async: false,
+                success: function(data) {
+                    if (data.message == "success")
+                    {
+                        BootstrapDialog.alert("操作成功");
+                        $('#myModal').modal('hide');
+                        var pageNo = $('#jqGrid').getGridParam('page');
+                        searchData(pageNo);
+                    } else if (data.message == "accountError") {
+                        $("#txt_account-error").text("该账号不存在").show();
+                        return;
+                    } else if (data.message == "typeError") {
+                        $("#txt_account-error").text("账号与类型不匹配").show();
+                        return;
+                    } else if (data.message == "allortRrror") {
+                        BootstrapDialog.alert("已分配过的文件不能重复分配");
+                        return;
+                    } else if (data.message == "schoolRrror") {
+                        BootstrapDialog.alert("该账号不属于该学校，请核对后再操作");
+                        return;
+                    }
+                    else {
+                        BootstrapDialog.alert(data.message);
+                    }
+                },
+                error: function(request) {
+                    BootstrapDialog.alert("Connection error");
+                }
+            });
+        }
+    });
+    
+    function showAccount() {
+       var selectVal = $("#txt_type").val();
+       if (selectVal == 2) {
+           $("#account_div").show();
+       }
+    }
+
+    function openFile(fileId) {
+        $("#" + fileId).click();
+    }
+
+    function uploadFile() {
+
+        var file = document.getElementById("file").files[0];
+        if (file == 'undefined') {
+            return;
+        }
+        var size = file.size;
+        if (size / (1024 * 1024) > 10.0) {
+            BootstrapDialog.alert("文件大小限制为10M以下！");
+            return;
+        }
+        var formData = new FormData($('#fileForm')[0]);
+        formData.append("type", "fileDownload");
+        $.ajax({
+            url: $("#fileForm").attr("action"),
+            type: 'POST',
+            dataType: 'json', //返回值类型，一般设置为json、application/json
+            data: formData, //传递参数到服务器
+//            async: false,
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function (data, status) {
+                if (data.message == "error") {
+                    BootstrapDialog.alert("文件处理失败!");
+                    return;
+                }
+
+                $("#txt_add_fileName").val(file.name);
+                $("#fileName").val(file.name);
+                $("#txt_add_filePath").val(data.filePath);
+            },
+            error: function (data, status, e) {
+                BootstrapDialog.alert("错误：上传组件错误，请检察网络!");
+            },beforeSend: function(){
+                $("#myaddModal").append('<div class="loadingWrap"></div>');
+            },
+            complete: function(){
+                $(".loadingWrap").remove();
+            }
+        });
+    }
+    
+    function addFileDownload() {
+
+        $("#txt_add_name").val("");
+        $("#txt_add_type").val("");
+        $("#txt_add_subType").val("");
+        $("#txt_add_description").val("");
+        $("#txt_add_filePath").val("");
+        $("#txt_add_fileName").val("");
+        $("#fileName").val("");
+
+        $("#myaddForm").attr("action", "/fileDownload/addFileDownload");
+        $("#myaddModalLabel").text("新增");
+        $('#myaddModal').modal();
+    }
+
+    $("#btn_add_submit").click(function (){
+        if ($("#myaddForm").valid()) {
+            if ($("#txt_add_filePath").val() == "") {
+                BootstrapDialog.alert("请上传文件");
+                return;
+            }
+            $.ajax({
+                type: "POST",
+                url: $('#myaddForm').attr("action"),
+                data:$('#myaddForm').serialize(),
+                async: false,
+                success: function(data) {
+                    if (data.message == "success")
+                    {
+                        BootstrapDialog.alert("操作成功");
+                        $('#myaddModal').modal('hide');
+                        var pageNo = $('#jqGrid').getGridParam('page');
+                        searchData(pageNo);
+                    }
+                    else {
+                        var jsonData = $.parseJSON(data);
+                        alert(jsonData.errorMsg);
+                    }
+                },
+                error: function(request) {
+                    alert("Connection error");
+                }
+            });
+        }
+    });
+
+    function searchCategory(typeId,subTypeId) {
+        $("#"+subTypeId+" option").remove();
+        $("#" + subTypeId).append("<option value=''>请选择</option>");
+        var typeId = $("#" + typeId).val();
+        if (typeId == "") {
+            $("#" + subTypeId).attr("disabled",true);
+            $("#" + subTypeId).val("");
+            return;
+        } else {
+            $("#" + subTypeId).attr("disabled",false);
+        }
+        $.ajax({
+            type: "GET",
+            url: "/category/searchCategory?type=2&subType=" + typeId,
+            async: false,
+            success: function(data) {
+                if (data.message == "success")
+                {
+                    var categorys = data.categorys;
+                    $.each(categorys, function (index, item) {
+
+                        var id = categorys[index].id;
+                        var text = categorys[index].text;
+                        $("#" + subTypeId).append("<option value='"+id+"'>"+text+"</option>");
+                    });
+
+                }
+                else {
+                    var jsonData = $.parseJSON(data);
+                    BootstrapDialog.alert(jsonData.errorMsg);
+                }
+            },
+            error: function(request) {
+                BootstrapDialog.alert("Connection error");
+            }
+        });
+    }
+
+    function delFileDownload(id) {
+        BootstrapDialog.confirm("确定删除该文件？", function(result){
+            if(result) {
+                $.ajax({
+                    type: "GET",
+                    url: "/fileDownload/delFileDownload?id=" + id,
+                    async: false,
+                    success: function(data) {
+                        if (data.msg == "success")
+                        {
+                            BootstrapDialog.alert("操作成功");
+                            var pageNo = $('#jqGrid').getGridParam('page');
+                            searchData(pageNo);
+                        }
+                        else {
+                            var jsonData = $.parseJSON(data);
+                            BootstrapDialog.alert(jsonData.errorMsg);
+                        }
+                    },
+                    error: function(request) {
+                        BootstrapDialog.alert("Connection error");
+                    }
+                });
+            }else {
+                return;
+            }
+        })
+
+    }
+</script>
+</html>

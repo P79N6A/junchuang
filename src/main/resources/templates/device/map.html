@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head"></head>
+<title>军创电子科技--设备地图</title>
+<body>
+<div th:replace="fragments/header :: header"></div>
+<div th:replace="fragments/menu :: menu"></div>
+<div class="col-sm-10 col-lg-10 main">
+    <div class="row">
+        <ul class="breadcrumb">
+            <li class="active">设备地图</li>
+        </ul>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-body" id="container">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div></div>
+</body>
+<script charset="utf-8" src="https://map.qq.com/api/js?v=2.exp&key=DQNBZ-KNNWU-LJBVF-4LU72-5WWI2-KVBQ7"></script>
+<script th:inline="javascript">
+
+    $(document).ready(function () {
+        $("#container").height($(window).height() * 0.78);
+        init();
+    });
+
+    function bindShop(shopInfo) {    //地图标注提示窗上按钮 点击后执行的函数
+        alert(shopInfo);  //传过来的包含 id/经度/纬度 的字符串参数
+    }
+
+    var init = function () {
+
+        $.ajax({
+            type: "GET",
+            url: "/device/searchData?rows=10&page=1",
+            async: false,
+            success: function (result) {
+                if (result.rows.length > 0) {
+                    var map = new qq.maps.Map(document.getElementById("container"), {    //地图部分初始化
+                        zoom: 17,               //设置地图缩放级别
+                        center: new qq.maps.LatLng(result.rows[0].latitude, result.rows[0].longitude),
+                        zoomControl: false,    //不启用缩放控件
+                        mapTypeControlOptions: {  //设置控件的地图类型为普通街道地图
+                            mapTypeIds: qq.maps.MapTypeId.ROADMAP
+                        }
+                    });
+                    var info = new qq.maps.InfoWindow({map: map});      //添加提示窗
+
+                    //result中数据 用于显示标记、和标记点击时的提示信息
+                    for (var i = 0; i < result.rows.length; i++) {
+                        var data = result.rows[i];
+                        var marker = new qq.maps.Marker({
+                            position: new qq.maps.LatLng(data.latitude, data.longitude),
+                            map: map
+                        });    //创建标记
+                        //***将必要的数据存入每一个对应的marker对象
+                        marker.id = data.id;
+                        marker.name = data.name;
+                        marker.locate = data.department;
+                        qq.maps.event.addListener(marker, 'click', function () {    //获取标记的点击事件
+                            info.open();  //点击标记打开提示窗
+                            info.setContent('<div class="mapInfo"><p class="center">炮点名称:' + this.name + '</p><p> 主管单位:' + this.locate + '</p><button type="button" onclick="bindShop(\'' + this.id + ',' + this.position.lat + ',' + this.position.lng + '\')">下达命令</button></div>');  //***设置提示窗内容（这里用到了marker对象中保存的数据）
+                            info.setPosition(new qq.maps.LatLng(this.position.lat, this.position.lng));  //提示窗位置
+                        });
+                    }
+                }
+            },
+            error: function (request) {
+                alert("Connection error");
+            }
+        });
+    }
+</script>
+</html>

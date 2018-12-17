@@ -1,0 +1,29 @@
+.newsList{
+    margin: 0px 10px 20px;
+    text-align: left;
+}
+.newsList div{
+    list-style-type: none;
+    margin: 0px;
+    padding: 0px;
+}
+.newsList div{
+    width: 100%;
+}
+.newsList div span{
+    float: right;/*使span元素浮动到右面*/
+    text-align: right;/*日期右对齐*/
+}
+.newsList div a{
+    color: #282828;
+    display: block;
+    padding: 6px 0px 4px 15px;
+    word-break:keep-all;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+    margin-right: 10%;
+    overflow:hidden;
+}
+.newsList div a:hover{
+     color: #336699;
+ }

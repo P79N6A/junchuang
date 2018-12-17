@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head"></head>
+<title>军创电子科技--武器管理</title>
+<body>
+<div th:replace="fragments/header :: header"></div>
+<div th:replace="fragments/menu :: menu"></div>
+<div class="col-sm-10 col-lg-10 main">
+    <div class="row">
+        <ul class="breadcrumb">
+            <li>武器管理</li>
+            <li class="active">武器配备</li>
+        </ul>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <span>查询条件</span>
+                </div>
+                <div class="panel-body">
+                    <form action="#" class="form-horizontal" role="form" id="searchForm">
+                        <div class="row">
+                            <div class="form-group col-xs-4">
+                                <label class="teach-control-label col-sm-3 control-label">炮点名称：</label>
+                                <div class="col-sm-5">
+                                    <input type="text" name="deviceName" class="form-control input-sm" id="deviceName">
+                                </div>
+                            </div>
+                            <div class="form-group col-xs-4">
+                                <label class="teach-control-label col-sm-3 control-label">武器编号：</label>
+                                <div class="col-sm-5">
+                                    <input type="text" name="number" class="form-control input-sm" id="number">
+                                </div>
+                            </div>
+                            <div class="form-group col-xs-4">
+                                <label class="teach-control-label col-sm-3 control-label">进驻时间：</label>
+                                <div class="col-sm-5">
+                                    <input type="text" name="stationedDate" class="form-control input-sm" id="stationedDate">
+                                </div>
+                            </div>
+                            <div class="form-group col-xs-4">
+                                <label class="teach-control-label col-sm-3 control-label">有效：</label>
+                                <div class="col-sm-5">
+                                    <select class='form-control' name="type" id="type">
+                                        <option value="">所有</option>
+                                        <option value="有效">有效</option>
+                                        <option value="无效">无效</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="teach-review-btns">
+                        <div class="col-sm-2">
+                            <button class="btn btn-primary" id="btnQuery" onclick="searchData();">
+                                查询
+                            </button>
+                        </div>
+                        <div class="col-sm-2">
+                            <button class="btn btn-primary" onclick="addAccount();">添加</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <span>查询结果</span>
+                </div>
+                <div class="panel-body">
+                    <div id="jqGrid_wrapper">
+                        <table id="jqGridList"></table>
+                        <div id="jqGridPager"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加窗口 -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">新增</h4>
+                </div>
+                <div class="modal-body">
+
+                    <form action="#" id="myForm" class="form-horizontal" role="form">
+                        <<input type="hidden" id="id" name="id" value="0"/>
+                        <div class="form-group col-xs-12">
+                            <label for="txt_deviceName" class="col-sm-3 teach-control-label">炮点名称：</label>
+                            <div class="col-sm-5">
+                                <input type="text" name="deviceName" class="form-control" id="txt_deviceName" required >
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12">
+                            <label for="txt_number" class="col-sm-3 teach-control-label">武器编号：</label>
+                            <div class="col-sm-5">
+                                <input type="text" name="number" class="form-control" id="txt_number" >
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12">
+                            <label for="txt_ranges" class="col-sm-3 teach-control-label">射程：</label>
+                            <div class="col-sm-5">
+                                <input type="text" name="ranges" class="form-control" id="txt_ranges" >
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12">
+                            <label for="txt_froms" class="col-sm-3 teach-control-label">来自：</label>
+                            <div class="col-sm-5">
+                                <input type="text" name="froms" class="form-control" id="txt_froms" >
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12">
+                            <label for="txt_checkDate" class="col-sm-3 teach-control-label">检测日期：</label>
+                            <div class="col-sm-5">
+                                <input type="text" name="checkDate" class="form-control" id="txt_checkDate" >
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12">
+                            <label for="txt_checkUser" class="col-sm-3 teach-control-label">检测人：</label>
+                            <div class="col-sm-5">
+                                <input type="text" name="checkUser" class="form-control" id="txt_checkUser" >
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12">
+                            <label for="txt_checkResult" class="col-sm-3 teach-control-label">检测结果：</label>
+                            <div class="col-sm-5">
+                                <input type="text" name="checkResult" class="form-control" id="txt_checkResult" >
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12">
+                            <label for="txt_belongOffice" class="col-sm-3 teach-control-label">所属单位：</label>
+                            <div class="col-sm-5">
+                                <input type="text" name="belongOffice" class="form-control" id="txt_belongOffice" >
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12">
+                            <label for="txt_license" class="col-sm-3 teach-control-label">许可证编号：</label>
+                            <div class="col-sm-5">
+                                <input type="text" name="license" class="form-control" id="txt_license" >
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12">
+                            <label for="txt_cameraId" class="col-sm-3 teach-control-label">摄像头ID：</label>
+                            <div class="col-sm-5">
+                                <input type="text" name="cameraId" class="form-control" id="txt_cameraId" >
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12">
+                            <label for="txt_cameraAccount" class="col-sm-3 teach-control-label">摄像头用户名：</label>
+                            <div class="col-sm-5">
+                                <input type="text" name="cameraAccount" class="form-control" id="txt_cameraAccount" >
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12">
+                            <label for="txt_cameraPassword" class="col-sm-3 teach-control-label">摄像头密码：</label>
+                            <div class="col-sm-5">
+                                <input type="text" name="cameraPassword" class="form-control" id="txt_cameraPassword" >
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12">
+                            <label for="txt_valid" class="col-sm-3 teach-control-label">有效：</label>
+                            <div class="col-sm-5">
+                                <input type="text" name="valid" class="form-control" id="txt_valid" >
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            &nbsp;
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal"><span
+                            class="glyphicon glyphicon-remove" aria-hidden="true" th:text="取消"></span></button>
+                    <button type="button" id="btn_submit" class="btn btn-primary"><span class="glyphicon glyphicon-ok"
+                                                                                        aria-hidden="true"
+                                                                                        th:text="确定"></span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div></div>
+</body>
+<script th:inline="javascript">
+
+    var jqGrid = $("#jqGridList");
+    $(document).ready(function () {
+        var url = '/arms/searchData?' + $('#searchForm').serialize() ;
+        jqGrid.jqGrid({
+            mtype: "GET",
+            styleUI : 'Bootstrap',
+            url: url,
+            datatype: "json",
+            ajaxGridOptions: { contentType: 'application/json;charset=utf-8' },
+            colModel: [
+                { label: 'id', name: 'id',key: true, align: 'center', width: $("#jqGridList").width()*0.15, hidden: true },
+                { label: '炮点名称', name: 'deviceName', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '武器编号', name: 'number', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '进驻时间', name: 'stationedDate', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '射程', name: 'ranges', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '来自', name: 'froms', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '检测日期', name: 'checkDate', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '检测人', name: 'checkUser', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '检测结果', name: 'checkResult', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '所属单位', name: 'belongOffice', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '许可证编号', name: 'license', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '摄像头ID', name: 'cameraId', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '摄像头用户名', name: 'cameraAccount', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '摄像头密码', name: 'cameraPassword', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '有效', name: 'valid', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '操作',name: 'Operation', frozen: true, align: 'center', sortable: false, width: $("#jqGridList").width()*0.25, formatter: function (cellValue, options, cellObject) {
+                        return '<a href="javascript:void(0);" onclick=\'editDevice("' + cellObject.id + '")\' >编辑</a>' +
+                            '<a href="javascript:void(0);" style="margin-left: 8px" onclick=\'delDevice("' + cellObject.id + '")\' >删除</a>';
+                }},
+            ],
+            viewrecords: true,
+            rowList: [5, 10, 15, 20, 30],
+            rowNum: 10,
+            pager: "#jqGridPager",
+            sortable: true,
+            sortorder: "asc",
+            width:$("#jqGrid_wrapper").width()-10,
+            height: $(window).height() * 0.4,
+//            rownumbers: true,
+//            rownumWidth:  $("#jqGridList").width()*0.1,
+//            gridComplete:function(){
+//                jqGrid.jqGrid('setLabel', 'rn', '序号', {
+//                    'text-align' : 'center'
+//                });
+//            }
+
+        });
+
+    });
+
+    flag = false;
+    function addAccount() {
+        // 初始化输入框中的数据
+        $("#txt_account").val("");
+        $("#txt_school").val("");
+        $("#txt_name").val("");
+        $("#txt_account-error").hide();
+
+        $("#myForm").attr("action", "/arms/addArms");
+        $("#myModalLabel").text("新增");
+        $('#myModal').modal();
+    }
+
+    $("#btn_submit").click(function (){
+        $.ajax({
+            type: "POST",
+            url: $("#myForm").attr("action"),
+            data:$('#myForm').serialize(),
+            async: false,
+            success: function(data) {
+                if (data.message == "success")
+                {
+                    BootstrapDialog.alert("操作成功");
+                    $('#myModal').modal('hide');
+                    var pageNo = $('#jqGrid').getGridParam('page');
+                    searchData(pageNo);
+                }
+                else {
+                    var jsonData = $.parseJSON(data);
+                    alert(jsonData.errorMsg);
+                }
+            },
+            error: function(request) {
+                alert("Connection error");
+            }
+        });
+    });
+
+    function searchData(pageNo) {
+        var url = '/arms/searchData?' + $('#searchForm').serialize();
+        jqGrid.jqGrid('setGridParam', { page: pageNo,url: url, datatype: 'json'}).trigger("reloadGrid");
+
+    }
+
+    function editDevice(id) {
+
+        var rowData = jqGrid.jqGrid('getRowData',id);
+        // 初始化输入框中的数据
+        $("#id").val(id);
+        $("#txt_name").val(rowData.name);
+        $("#txt_department").val(rowData.department);
+        $("#txt_latitude").val(rowData.latitude);
+        $("#txt_longitude").val(rowData.longitude);
+        $("#txt_height").val(rowData.height);
+        $("#txt_ip").val(rowData.ip);
+        $("#txt_port").val(rowData.port);
+        $("#txt_cameraId").val(rowData.cameraId);
+        $("#txt_cameraAccount").val(rowData.cameraAccount);
+        $("#txt_cameraPassword").val(rowData.cameraPassword);
+        $("#txt_airspace").val(rowData.airspace);
+
+        $("#myForm").attr("action", "/arms/modArms");
+        $("#myModalLabel").text("编辑");
+        $('#myModal').modal();
+    }
+
+    function delDevice(id) {
+        BootstrapDialog.confirm("确定删除该武器配备信息？", function(result){
+            if(result) {
+                $.ajax({
+                    type: "GET",
+                    url: "/arms/delArms?id=" + id,
+                    async: false,
+                    success: function(data) {
+                        if (data.msg == "success")
+                        {
+                            BootstrapDialog.alert("操作成功");
+                            var pageNo = $('#jqGrid').getGridParam('page');
+                            searchData(pageNo);
+                        }
+                        else {
+                            var jsonData = $.parseJSON(data);
+                            BootstrapDialog.alert(jsonData.errorMsg);
+                        }
+                    },
+                    error: function(request) {
+                        BootstrapDialog.alert("Connection error");
+                    }
+                });
+            }else {
+                return;
+            }
+        })
+
+    }
+</script>
+</html>

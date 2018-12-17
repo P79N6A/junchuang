@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/ui.jqgrid-bootstrap-ui.css}" />
+    <link rel="stylesheet" th:href="@{/css/bootstrap-select.css}" />
+    <link rel="stylesheet" th:href="@{/css/bootstrap-datetimepicker.min.css}" />
+    <title>消费记录管理系统</title>
+</head>
+<body>
+
+    <div class="navbar navbar-inverse" role="navigation">
+        <div class="navbar-header">
+            <a href="##" class="navbar-brand">LOGO</a>
+        </div>
+        <ul class="nav navbar-nav">
+            <li class="active"><a href="/">登录页</a></li>
+            <li><a href="">关于我们</a></li>
+        </ul>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <form class="form-horizontal" role="form" method="post" id="searchForm">
+                <div class="row">
+                    <div class="form-group col-xs-6">
+                        <label for="begin_date_txt_input" class="col-sm-4 control-label">开始日期：</label>
+                        <div class="col-sm-6">
+                            <div class='input-group date' id='begin_date'>
+                                <input type='text' name="beginDate" class="form-control" id="begin_date_txt_input"/>
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group col-xs-6">
+                        <label for="end_date_txt_input" class="col-sm-4 control-label">结束日期：</label>
+                        <div class="col-sm-6">
+                            <div class='input-group date' id='end_date'>
+                                <input type='text' name="endDate" class="form-control" id="end_date_txt_input"/>
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group col-xs-6">
+                        <label for="ex_re_type_txt_input" class="col-sm-4 control-label">收支类型：</label>
+                        <div class="col-sm-6">
+                            <select class='form-control' name="type" id="ex_re_type_txt_input" onchange="changeType(this,'1')">
+                                <option value="0">支出</option>
+                                <option value="1">收入</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group col-xs-6" id="consume_type_div1">
+                        <label for="type_txt_input" class="col-sm-4 control-label">支出类型：</label>
+                        <div class="col-sm-6">
+                            <select class='form-control' name="consumeType" id="type_txt_input">
+                                <option value="">全部</option>
+                                <option th:each="consume : ${consumeTypes}" th:value="${consume.type}"
+                                        th:text="${consume.type}">
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group col-xs-6 hidden" id="expense_type_div1">
+                        <label for="expense_type_txt_input" class="col-sm-4 control-label">收入类型：</label>
+                        <div class="col-sm-6">
+                            <select class='form-control' name="expenseType" id="expense_type_txt_input">
+                                <option value="">全部</option>
+                                <option th:each="expense : ${expenseTypes}" th:value="${expense.type}"
+                                        th:text="${expense.type}">
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="form-group col-xs-4">
+                <label for="expense_money" class="col-sm-4 control-label">总收入：</label>
+                <div class="col-sm-6">
+                    <input type="text" name="money" class="form-control" id="expense_money" disabled />
+                </div>
+            </div>
+            <div class="form-group col-xs-4">
+                <label for="consume_money" class="col-sm-4 control-label">总支出：</label>
+                <div class="col-sm-6">
+                    <input type="text" name="money" class="form-control" id="consume_money" disabled />
+                </div>
+            </div>
+            <div class="form-group col-xs-4">
+                <label for="net_income" class="col-sm-4 control-label">净收入：</label>
+                <div class="col-sm-6">
+                    <input type="text" name="money" class="form-control" id="net_income" disabled />
+                </div>
+            </div>
+        </div>
+            <hr>
+                <div class="row">
+                    <div class="form-inline pull-right">
+                        <button type="button" class="btn " id="btn_add" onclick="add();"><span th:text="新增"></span></button>
+                        <button type="button" class="btn " onclick="searchData(1);"><span th:text="查询"></span></button>
+                    </div>
+                </div>
+            </hr>
+        <hr></hr>
+        <div style="hight:60px" class="row ">
+            <div class="margin-left:60px form-group col-xs-12 ">
+                <label style="background-color:#337AB7" class="col-sm-12 control-label" >查询结果</label>
+            </div>
+        </div>
+
+        <div id="jqGrid_wrapper">
+            <table id="jqGridList"></table>
+            <div id="jqGridPager"></div>
+        </div>
+    </div>
+    <div id="footer" class="container">
+        <nav class="navbar navbar-default navbar-fixed-bottom">
+            <div class="navbar-inner navbar-content-center">
+                <p class="text-muted credit" style="padding: 10px;text-align: center;">
+                    Copyright © 1999-2017, yanf.bill, All Rights Reserved
+                </p>
+            </div>
+        </nav>
+    </div>
+
+    <!--新增弹出框-->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <form id="consume_form" action="/consume/add" method="post" class="form-horizontal" role="form" >
+                <input type="hidden" id="row_id" name="id" value="0"/>
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        <h4 class="modal-title" id="myModalLabel"><span th:text="新增消费"></span></h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="pop_date_txt_input" class="col-sm-2 control-label">日期：</label>
+                            <div class="col-sm-9">
+                                <div class='input-group date' id='pop_date'>
+                                    <input type='text' name="date" class="form-control" id="pop_date_txt_input"/>
+                                    <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pop_type" class="col-sm-2 control-label">收支类型:</label>
+                            <div class="col-sm-9">
+                                <select class='form-control' name="type" id="pop_type" onchange="changeType(this,'2')">
+                                    <option value="0">支出</option>
+                                    <option value="1">收入</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="consume_type_div2">
+                            <label for="pop_consume_type" class="col-sm-2 control-label">支出类型:</label>
+                            <div class="col-sm-9">
+                                <select class='form-control' name="consumeType" id="pop_consume_type">
+                                    <option th:each="consume : ${consumeTypes}" th:value="${consume.type}"
+                                            th:text="${consume.type}">
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group hidden" id="expense_type_div2">
+                            <label for="pop_expense_type" class="col-sm-2 control-label">收入类型:</label>
+                            <div class="col-sm-9">
+                                <select class='form-control' name="expenseType" id="pop_expense_type">
+                                    <option th:each="expense : ${expenseTypes}" th:value="${expense.type}"
+                                            th:text="${expense.type}">
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="pop_money" class="col-sm-2 control-label">金额:</label>
+                            <div class="col-sm-9">
+                                <input type="text" name="money" class="form-control" id="pop_money" th:placeholder="金额"/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="pop_notes" class="col-sm-2 control-label">备注:</label>
+                            <div class="col-sm-9">
+                                <input type="text" name="notes" class="form-control" id="pop_notes" th:placeholder="备注"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal"><span class="glyphicon glyphicon-remove" aria-hidden="true" th:text="取消"></span></button>
+                        <button type="button" id="btn_submit" class="btn btn-primary"><span class="glyphicon glyphicon-ok" aria-hidden="true" th:text="确定"></span></button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+<script th:src="@{/js/jquery-1.9.1.min.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}"></script>
+<script th:src="@{/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/js/grid.locale-cn.js}"></script>
+<script th:src="@{/js/bootstrap-select.js}"></script>
+<script th:src="@{/js/moment-with-locales.min.js}"></script>
+<script th:src="@{/js/bootstrap-datetimepicker.min.js}"></script>
+<script th:src="@{/js/bootstrap-datetimepicker.zh-CN.js}"></script>
+<script th:inline="javascript">
+    var jqGrid = $("#jqGridList");
+    $(document).ready(function () {
+        $("#begin_date_txt_input").val(getNowFormatDate('1'));
+        $("#end_date_txt_input").val(getNowFormatDate('0'));
+        var url = '/consume/query?' + $("#searchForm").serialize();
+        jqGrid.jqGrid({
+            mtype: "GET",
+            styleUI : 'Bootstrap',
+            url: url,
+            datatype: "json",
+            ajaxGridOptions: { contentType: 'application/json;charset=utf-8' },
+            colModel: [
+                { label: 'id', name: 'id',key: true, width: 40, hidden: true },
+                { label: '操作',name: 'Operation', frozen: true, align: 'center', sortable: false, width: 60, formatter: function (cellValue, options, cellObject) {
+                    return '<a href="javascript:void(0);" onclick=\'edit("' + cellObject.id + '")\' >编辑</a>&nbsp;' +
+                        '<a href="javascript:void(0);" onclick=\'del("' + cellObject.id + '")\' >删除</a>';
+                }},
+                { label: '日期', name: 'date', width: 100},
+                { label: '收支类型', name: 'type', width: 80, formatter:function(value,options,rowData){
+                    if( value === '0' ){
+                        return '支出';
+                    }else{
+                        return '收入';
+                    }
+                }},
+                { label: '消费类型', name: 'consumeType', width: 80},
+                { label: '收入类型', name: 'expenseType', width: 80},
+                { label: '金额', name: 'money', width: 100 },
+                { label: '备注', name: 'notes', width: 180 },
+            ],
+            viewrecords: true,
+            height: '60%',
+            rowNum: 10,
+            pager: "#jqGridPager",
+            width:$("#jqGrid_wrapper").width()-10,
+//            gridComplete:function(data){
+//                debugger;
+//                var ids = $("#jqGridList").jqGrid("getDataIDs");
+//                alert(data);
+//
+//            },
+            loadComplete:function (data) {
+                $("#expense_money").val(data.mapData.expenseMoney);
+                $("#consume_money").val(data.mapData.consumeMoney);
+                $("#net_income").val(data.mapData.netIncome);
+//                jqGrid.setGridParam().hideCol("expenseType").trigger("reloadGrid");
+            }
+
+        });
+
+        $('.date').datetimepicker({
+            format: 'yyyy-mm-dd',
+            minView: 2,
+            autoclose: true,
+            locale: moment.locale('zh-cn')
+        });
+    });
+
+    function add() {
+        // 初始化输入框中的数据
+        $("#pop_date_txt_input").val(getNowFormatDate(''));
+        $("#pop_money").val("");
+        $("#pop_type").val(0);
+        $('#expense_type_div2').addClass("hidden");
+        $('#consume_type_div2').removeClass("hidden");
+        $("#pop_notes").val("");
+
+        $("#consume_form").attr("action", "/consume/add");
+        $("#myModalLabel").text("新增消费");
+//        $('#myModal').width = $('#myModal').width+20;
+        $('#myModal').modal();
+    }
+
+    // 修改行
+    function  edit(rowid) {
+        // 填充所选行的数据
+        var rowData = jqGrid.jqGrid('getRowData',rowid);
+        $("#pop_date_txt_input").val(rowData.date);
+
+        $("#pop_consume_type").val(rowData.consumeType);
+        $("#pop_expense_type").val(rowData.expenseType);
+        if(rowData.type == '支出') {
+            $("#pop_type").val(0);
+            $('#expense_type_div2').addClass("hidden");
+            $('#consume_type_div2').removeClass("hidden");
+        }else {
+            $("#pop_type").val(1);
+            $('#expense_type_div2').removeClass("hidden");
+            $('#consume_type_div2').addClass("hidden");
+        }
+
+        $("#pop_money").val(rowData.money);
+        $("#pop_notes").val(rowData.notes);
+        $("#row_id").val(rowid);
+
+        $("#consume_form").attr("action", "/consume/mod");
+        $("#myModalLabel").text("修改消费");
+        $('#myModal').modal();
+    }
+
+    function del(id) {
+        if(confirm("确定要删除此条消费记录吗？")) {
+            $.ajax({
+                type: "GET",
+                url: "/consume/del?id=" + id,
+                async: false,
+                success: function(data) {
+                    if (data.msg == "success")
+                    {
+                        alert("操作成功");
+                        var pageNo = $('#jqGrid').getGridParam('page');
+                        searchData(pageNo);
+                    }
+                    else {
+                        var jsonData = $.parseJSON(data);
+                        alert(jsonData.errorMsg);
+                    }
+                },
+                error: function(request) {
+                    alert("Connection error");
+                }
+            });
+        }
+    }
+
+    $("#btn_submit").click(function () {
+        var type = $("#ex_re_type_txt_input").val();
+        var popType = $("#pop_type").val();
+        $.ajax({
+            type: "POST",
+            url: $("#consume_form").attr("action"),
+            data:$('#consume_form').serialize(),
+            async: false,
+            success: function(data) {
+                if (data.msg == "success")
+                {
+                    alert("操作成功");
+                    $('#myModal').modal('hide');
+                    if(type != popType) {
+                        $("#ex_re_type_txt_input").val(popType);
+                        $("#type_txt_input").val("");
+                        $("#expense_type_txt_input").val("");
+                    }
+                    var pageNo = $('#jqGrid').getGridParam('page');
+                    searchData(pageNo);
+                }
+                else {
+                    var jsonData = $.parseJSON(data);
+                    alert(jsonData.errorMsg);
+                }
+            },
+            error: function(request) {
+                alert("Connection error");
+            }
+        });
+    });
+
+    function searchData(pageNo) {
+        var url = '/consume/query?' + $("#searchForm").serialize();
+        jqGrid.jqGrid('setGridParam',
+            { page: pageNo,url: url, datatype: 'json',
+                loadComplete:function (data) {
+                $("#expense_money").val(data.mapData.expenseMoney);
+                $("#consume_money").val(data.mapData.consumeMoney);
+                $("#net_income").val(data.mapData.netIncome);
+            }}
+            ).trigger("reloadGrid");
+
+    }
+
+    function getNowFormatDate(day) {
+        var date = new Date();
+        var seperator = "-";
+        var month = date.getMonth() + 1;
+        var strDate = date.getDate();
+        if (month >= 1 && month <= 9) {
+            month = "0" + month;
+        }
+        if (strDate >= 0 && strDate <= 9) {
+            strDate = "0" + strDate;
+        }
+        // 当前日期
+        if ('' == day) {
+            return date.getFullYear() + seperator + month + seperator + strDate;
+        }
+        // 当月第一天
+        else if ('1' == day){
+            return date.getFullYear() + seperator + month + seperator + 01;
+        }
+        // 当月最后一天
+        else {
+            var year = date.getYear()
+            var day = new Date(year,month,0);
+            return date.getFullYear() + seperator + month + seperator + day.getDate();
+        }
+    }
+    
+    function changeType(obj,index) {
+        // 收入
+        if(obj.value == 1) {
+            $('#expense_type_div' + index).removeClass("hidden");
+            $('#consume_type_div' + index).addClass("hidden");
+        }
+        else {
+            $('#expense_type_div' + index).addClass("hidden");
+            $('#consume_type_div' + index).removeClass("hidden");
+        }
+    }
+</script>
+</html>

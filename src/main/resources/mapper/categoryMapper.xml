@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teachingplan.console.dao.category.CategoryDao">
+
+    <resultMap id="Category" type="com.teachingplan.console.beans.category.Category">
+        <id property="id" column="id"></id>
+        <result property="parentId" column="parent_id"></result>
+        <result property="subType" column="sub_type"></result>
+        <result property="filePath" column="file_path"></result>
+    </resultMap>
+
+    <select id="getCategoryByType" parameterType="int" resultMap="Category">
+        select * from category_t where type = #{value}
+    </select>
+
+    <select id="findCategoryById" parameterType="int" resultMap="Category">
+        select * from category_t where id = #{value}
+    </select>
+
+    <select id="getChildCategories" parameterType="int" resultMap="Category">
+        select * from category_t  where parent_id= #{value}
+    </select>
+    <select id="findCategory" resultMap="Category">
+        select * from category_t  where parent_id= #{parentId} and text=#{text}
+    </select>
+
+    <select id="getCategoryBySubType" resultMap="Category">
+        select * from category_t
+        where parent_id=(select id from category_t
+        <where>
+            <if test="type != null and type != '' ">
+                type = #{type} and sub_type = #{subType}
+            </if>
+            <if test="type == null or type == '' ">
+                type is null and sub_type = #{subType}
+            </if>
+        </where>
+        )
+    </select>
+
+    <update id="modCategory" parameterType="com.teachingplan.console.beans.category.Category">
+        update category_t set text =#{text},cover=#{cover},file_path=#{filePath} where id = #{id}
+    </update>
+
+    <delete id="delCategory" parameterType="int" >
+        delete from category_t where id =#{value}
+    </delete>
+
+</mapper>

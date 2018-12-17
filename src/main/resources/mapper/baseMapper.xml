@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teachingplan.console.dao.BaseDao">
+
+    <select id="getTotalCount" parameterType="com.teachingplan.console.beans.SelectArgs" resultType="int">
+        select count(*) from ${tableName}
+        <where>
+            <foreach collection="params.entrySet()" item="value" index="key" separator="and">
+                ${key} like "%"#{value}"%"
+            </foreach>
+            <if test="excludeParams != null and excludeParams.size > 0 ">
+                and
+            </if>
+            <foreach collection="excludeParams.entrySet()" item="value" index="key" separator="and">
+                ${key} != #{value}
+            </foreach>
+            <if test="equalsParams != null and equalsParams.size > 0 ">
+                and
+            </if>
+            <foreach collection="equalsParams.entrySet()" item="value" index="key" separator="and">
+                ${key} = #{value}
+            </foreach>
+        </where>
+    </select>
+
+    <select id="queryList" parameterType="com.teachingplan.console.beans.SelectArgs" resultType="Map">
+        select * from ${tableName}
+        <where>
+            <foreach collection="params.entrySet()" item="value" index="key" separator="and">
+                ${key} like "%"#{value}"%"
+            </foreach>
+            <if test="excludeParams != null and excludeParams.size > 0 ">
+                and
+            </if>
+            <foreach collection="excludeParams.entrySet()" item="value" index="key" separator="and">
+                ${key} != #{value}
+            </foreach>
+            <if test="equalsParams != null and equalsParams.size > 0 ">
+                and
+            </if>
+            <foreach collection="equalsParams.entrySet()" item="value" index="key" separator="and">
+                ${key} = #{value}
+            </foreach>
+        </where>
+        limit #{beginIndex}, #{pageSize}
+    </select>
+
+    <insert id="addRecord" parameterType="com.teachingplan.console.beans.InsertArgs">
+        insert into ${tableName}
+        <foreach collection="params.keys" item="key" open="(" close=")"
+                 separator=",">
+            ${key}
+        </foreach>
+        values
+        <foreach collection="params.values" item="value" open="("
+                 close=")" separator=",">
+            #{value}
+        </foreach>
+    </insert>
+
+</mapper>

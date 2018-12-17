@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="menu" class="navMenubox col-sm-2 col-lg-2">
+    <div id="slimtest1">
+        <div class="navMenu-top">
+            <div id="mini" style=""><i class="fa fa-bars fa-2x"></i></div>
+        </div>
+        <ul class="navMenu">
+            <li th:each="menu, iterStat : ${session.menus}">
+                <a th:href="${menu.address} ? ${menu.address}:'javascript:;'" class="afinve"> <i th:class="'icon_' + ${iterStat.index}"></i>
+                    <span class="" th:text="${menu.name}"></span> <span th:class="${not #lists.isEmpty(menu.childMenus)? 'arrow':''}"></span> </a>
+                <ul th:if="${not #lists.isEmpty(menu.childMenus)}" class="sub-menu">
+                    <li th:each="childMenu : ${menu.childMenus}"><a th:href="${childMenu.address}"><span th:text="${childMenu.name}"></span></a></li>
+                   <!-- <li > <a href="javascript:;" class="afinve"><span>个人信息</span><span class="arrow"></span></a>
+                        <ul class="sub-menu">
+                            <li><a href="javascript:;"><span>我的任务</span></a></li>
+                        </ul>
+                    </li>-->
+                </ul>
+            </li>
+        </ul>
+    </div>
+</div>
+</html>

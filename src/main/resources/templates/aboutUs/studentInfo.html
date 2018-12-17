@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" th:href="@{/css/ui.jqgrid-bootstrap-ui.css}"/>
+    <link rel="stylesheet" th:href="@{/css/bootstrap-select.css}"/>
+    <link rel="stylesheet" th:href="@{/css/bootstrap-datetimepicker.min.css}"/>
+    <link rel="stylesheet" th:href="@{/css/style/style.css}"/>
+    <link rel="stylesheet" th:href="@{/css/style/navigation.css}"/>
+    <title>实验室管理系统</title>
+</head>
+<body>
+<div th:replace="fragments/header :: header"></div>
+<input type="hidden" id="type" name="type" th:value="${type}"/>
+<div class="row">
+    <div class="form-group col-xs-2">
+        <div class="nav_left">
+            <div class="nav_div1">
+                <div class="nav_div2">
+                    <div class="nav_zcd"></div>
+                    <a class="button-a" href="/public/aboutUs/lab">实验室简介</a>
+                </div>
+                <div class="nav_div2_zcd">
+                    <div class="nav_zcd"></div>
+                    师资队伍
+                </div>
+                <div class="nav_div3">
+                    <ul>
+                        <li> <a class="button-a" href="/public/aboutUs/teacher?type=1">全职教师</a></li>
+                        <li> <a class="button-a" href="/public/aboutUs/teacher?type=2">兼职教师</a></li>
+                    </ul>
+                </div>
+                <div class="nav_div2_zcd">
+                    <div class="nav_zcd"></div>
+                    学生信息
+                </div>
+                <div class="nav_div3" id="studentBar">
+                    <ul>
+                        <li><a class="button-a" href="/public/aboutUs/student?type=3">在读学生</a></li>
+                        <li><a class="button-a" href="/public/aboutUs/student?type=4">毕业学生</a></li>
+                    </ul>
+                </div>
+                <div class="nav_div2">
+                    <div class="nav_zcd"></div>
+                    <a class="button-a" href="/public/aboutUs/contactUs">联系我们</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-group col-xs-10" id="student">
+        <h2 th:text="${tittle}" style="text-align:center"></h2>
+        <div class="form-group col-sm-3" th:each="user:${userList}" align="center" th:onclick="'javascript:showInfo(\''+${user.id}+'\')'">
+            <img th:src="${user.photo}">
+            <div><a th:text="${user.chName}" href="#"></a></div>
+        </div>
+    </div>
+    <div class="form-group col-xs-10" id="graduatedStudent">
+        <h2 th:text="${tittle}" style="text-align:center"></h2>
+        <div id="jqGrid_wrapper">
+            <table id="jqGridList"></table>
+            <div id="jqGridPager"></div>
+        </div>
+    </div>
+</div>
+<!--弹出框-->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <form id="consume_form" action="/consume/add" method="post" class="form-horizontal" role="form" >
+            <input type="hidden" id="row_id" name="id" value="0"/>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                    <h4 class="modal-title" id="myModalLabel"><span th:text="详细信息"></span></h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="chName" class="col-sm-2 control-label">姓名:</label>
+                        <div class="col-sm-9">
+                            <input type="text" name="chName" class="form-control" id="chName"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cardNumber" class="col-sm-2 control-label">学号:</label>
+                        <div class="col-sm-9">
+                            <input type="text" name="cardNumber" class="form-control" id="cardNumber"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="sex" class="col-sm-2 control-label">性别:</label>
+                        <div class="col-sm-9">
+                            <input type="text" name="sex" class="form-control" id="sex"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="studentType" class="col-sm-2 control-label">类别:</label>
+                        <div class="col-sm-9">
+                            <input type="text" name="studentType" class="form-control" id="studentType"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="nationality" class="col-sm-2 control-label">国籍:</label>
+                        <div class="col-sm-9">
+                            <input type="text" name="nationality" class="form-control" id="nationality"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="tutor" class="col-sm-2 control-label">导师:</label>
+                        <div class="col-sm-9">
+                            <input type="text" name="tutor" class="form-control" id="tutor"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div th:replace="fragments/footer :: footer"></div>
+</body>
+<script th:src="@{/js/jquery-1.9.1.min.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}"></script>
+<script th:src="@{/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/js/grid.locale-cn.js}"></script>
+<script th:src="@{/js/bootstrap-select.js}"></script>
+<script th:src="@{/js/moment-with-locales.min.js}"></script>
+<script th:src="@{/js/bootstrap-datetimepicker.min.js}"></script>
+<script th:src="@{/js/bootstrap-datetimepicker.zh-CN.js}"></script>
+
+<script th:src="@{/js/script/wowslider.js}"></script>
+<script th:src="@{/js/script/common.js}"></script>
+<script th:inline="javascript">
+    $(document).ready(function () {
+        $("#aboutUs").addClass("active");
+
+        $("#studentBar").slideToggle("slow");
+        $(".nav_div2_zcd").click(function () {
+            $(this).next("div .nav_div3").slideToggle("slow")
+                .siblings(".nav_div3:visible").slideUp("slow");
+        });
+        var type = $("#type").val();
+        if(type == "3") {
+            $("#student").show();
+            $("#graduatedStudent").hide();
+        } else {
+            $("#student").hide();
+            $("#graduatedStudent").show();
+
+            var jqGrid = $("#jqGridList");
+            jqGrid.jqGrid({
+                mtype: "GET",
+                styleUI : 'Bootstrap',
+                url: "/public/aboutUs/userInfo?type=" + type,
+                datatype: "json",
+                ajaxGridOptions: { contentType: 'application/json;charset=utf-8' },
+                colModel: [
+                    { label: 'id', name: 'id',key: true, width: 40, hidden: true },
+                    { label: '姓名', name: 'chName', width: 100},
+                    { label: '学号', name: 'cardNumber', width: 80},
+                    { label: '性别', name: 'sex', width: 80},
+                    { label: '类型', name: 'type', width: 100 },
+                    { label: '入学时间', name: 'inTime', width: 180, formatter:"date"},
+                    { label: '毕业时间', name: 'outTime', width: 180 },
+                    { label: '初次毕业就业单位', name: 'unit', width: 280 }
+                ],
+                viewrecords: true,
+                height: '60%',
+                rowNum: 10,
+                pager: "#jqGridPager",
+                width:$("#jqGrid_wrapper").width()-10,
+                loadComplete:function (data) {
+                    $("#tittle").text(data.mapData.tittle);
+                }
+
+            });
+        }
+    });
+
+   function showInfo(id) {
+       var type = $("#type").val();
+       $.ajax({
+           type: "GET",
+           url: "/public/aboutUs/studentInfo?type=" + type + "&id=" + id,
+           async: false,
+           success: function(data) {
+               $("#chName").val(data.user.chName);
+               $("#cardNumber").val(data.user.cardNumber);
+               $("#sex").val(data.user.sex);
+               $("#studentType").val(data.user.type);
+               $("#nationality").val(data.user.nationality);
+               $("#tutor").val(data.user.tutor);
+               $('#myModal').modal();
+//                alert(data.user.chName);
+           }
+       });
+   }
+
+</script>
+</html>

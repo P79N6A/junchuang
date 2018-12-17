@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" th:href="@{/css/ui.jqgrid-bootstrap-ui.css}"/>
+    <link rel="stylesheet" th:href="@{/css/bootstrap-select.css}"/>
+    <link rel="stylesheet" th:href="@{/css/bootstrap-datetimepicker.min.css}"/>
+    <link rel="stylesheet" th:href="@{/css/style/style.css}"/>
+    <link rel="stylesheet" th:href="@{/css/style/news.css}"/>
+    <title>实验室管理系统</title>
+</head>
+<body>
+<div th:replace="fragments/header :: header"></div>
+<div class="row">
+<div id="wowslider-container1" class="form-group col-xs-2">
+    <div class="ws_images">
+        <ul>
+            <li><img src="/image/1.jpg" title="机房实验室" id="wows1_0"></li>
+            <li><img src="/image/2.jpg" title="电子实验室" id="wows1_1"></li>
+            <li><a href="http://wowslider.com/vi"><img th:src="@{/image/3.jpg}" alt="bootstrap carousel" title="3"
+                                                       id="wows1_2"></a></li>
+            <li><img th:src="@{/image/4.jpg}" title="4" id="wows1_3"></li>
+        </ul>
+        <div class="ws_script" style="position:absolute;left:-99%"></div>
+        <div class="ws_shadow"></div>
+    </div>
+</div>
+    <div id="wowslider-container2" class="form-group col-xs-6">
+        实验室简介：
+        <hr>
+        <div class=newsList>
+            <div><span>10/6</span><a title="超级漂亮的几款清新、常用的网页CSS布局配色实例" target="_blank" href="http://www.csrcode.cn/html/txdm/tcys/1061.htm">
+                超级漂亮的几款清新、常用的网页CSS布局配色实例1常用的网页CSS布局配色实例2常用的网页CSS布局配色实例3常用的网页CSS布局配色实例</a></div>
+            <div><span>10/6</span><a title="CSS制作斜角上有背景图片的Div层" target="_blank" href="http://www.csrcode.cn/html/txdm/tcys/1060.htm">
+                CSS制作斜角上有背景图片的Div层</a></div>
+            <div><span>10/6</span><a title="Js实现的层展开、层折叠效果，默认时候层是折叠的" target="_blank" href="http://www.csrcode.cn/html/txdm/tcys/1059.htm">
+                Js实现的层展开、层折叠效果，默认时候层是折叠的</a></div>
+            <div><span>10/6</span><a title="DIV始终固定在网页右下角位置的CSS实现方法" target="_blank" href="http://www.csrcode.cn/html/txdm/tcys/1058.htm">
+                DIV始终固定在网页右下角位置的CSS实现方法</a></div>
+            <div><span>10/6</span><a title="DIV始终固定在网页右下角位置的CSS实现方法" target="_blank" href="http://www.csrcode.cn/html/txdm/tcys/1058.htm">
+                DIV始终固定在网页右下角位置的CSS实现方法</a></div>
+            <div><span>10/6</span><a title="DIV始终固定在网页右下角位置的CSS实现方法" target="_blank" href="http://www.csrcode.cn/html/txdm/tcys/1058.htm">
+                DIV始终固定在网页右下角位置的CSS实现方法</a></div>
+            <div><span>10/6</span><a title="DIV始终固定在网页右下角位置的CSS实现方法" target="_blank" href="http://www.csrcode.cn/html/txdm/tcys/1058.htm">
+                DIV始终固定在网页右下角位置的CSS实现方法</a></div>
+            <div><span>10/6</span><a title="DIV始终固定在网页右下角位置的CSS实现方法" target="_blank" href="http://www.csrcode.cn/html/txdm/tcys/1058.htm">
+                DIV始终固定在网页右下角位置的CSS实现方法</a></div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div id="wowslider-container3" class="form-group col-xs-4">
+        通知通告：
+        <hr>
+        <div class=newsList>
+            <div><span>10/6</span><a title="超级漂亮的几款清新、常用的网页CSS布局配色实例" target="_blank" href="http://www.csrcode.cn/html/txdm/tcys/1061.htm">
+                超级漂亮的几款清新、常用的网页CSS布局配色实例1常用的网页CSS布局配色实例2常用的网页CSS布局配色实例3常用的网页CSS布局配色实例</a></div>
+            <div><span>10/6</span><a title="CSS制作斜角上有背景图片的Div层" target="_blank" href="http://www.csrcode.cn/html/txdm/tcys/1060.htm">
+                CSS制作斜角上有背景图片的Div层</a></div>
+            <div><span>10/6</span><a title="Js实现的层展开、层折叠效果，默认时候层是折叠的" target="_blank" href="http://www.csrcode.cn/html/txdm/tcys/1059.htm">
+                Js实现的层展开、层折叠效果，默认时候层是折叠的</a></div>
+            <div><span>10/6</span><a title="DIV始终固定在网页右下角位置的CSS实现方法" target="_blank" href="http://www.csrcode.cn/html/txdm/tcys/1058.htm">
+                DIV始终固定在网页右下角位置的CSS实现方法</a></div>
+            <div><span>10/6</span><a title="DIV始终固定在网页右下角位置的CSS实现方法" target="_blank" href="http://www.csrcode.cn/html/txdm/tcys/1058.htm">
+                DIV始终固定在网页右下角位置的CSS实现方法</a></div>
+            <div><span>10/6</span><a title="DIV始终固定在网页右下角位置的CSS实现方法" target="_blank" href="http://www.csrcode.cn/html/txdm/tcys/1058.htm">
+                DIV始终固定在网页右下角位置的CSS实现方法</a></div>
+            <div><span>10/6</span><a title="DIV始终固定在网页右下角位置的CSS实现方法" target="_blank" href="http://www.csrcode.cn/html/txdm/tcys/1058.htm">
+                DIV始终固定在网页右下角位置的CSS实现方法</a></div>
+            <div><span>10/6</span><a title="DIV始终固定在网页右下角位置的CSS实现方法" target="_blank" href="http://www.csrcode.cn/html/txdm/tcys/1058.htm">
+                DIV始终固定在网页右下角位置的CSS实现方法</a></div>
+        </div>
+    </div>
+    <div id="wowslider-container4" class="form-group col-xs-4">
+        新闻动态：
+        <hr>
+        <div class=newsList>
+            <div><span>10/6</span><a title="超级漂亮的几款清新、常用的网页CSS布局配色实例" target="_blank" href="http://www.csrcode.cn/html/txdm/tcys/1061.htm">
+                超级漂亮的几款清新、常用的网页CSS布局配色实例1常用的网页CSS布局配色实例2常用的网页CSS布局配色实例3常用的网页CSS布局配色实例</a></div>
+            <div><span>10/6</span><a title="CSS制作斜角上有背景图片的Div层" target="_blank" href="http://www.csrcode.cn/html/txdm/tcys/1060.htm">
+                CSS制作斜角上有背景图片的Div层</a></div>
+            <div><span>10/6</span><a title="Js实现的层展开、层折叠效果，默认时候层是折叠的" target="_blank" href="http://www.csrcode.cn/html/txdm/tcys/1059.htm">
+                Js实现的层展开、层折叠效果，默认时候层是折叠的</a></div>
+            <div><span>10/6</span><a title="DIV始终固定在网页右下角位置的CSS实现方法" target="_blank" href="http://www.csrcode.cn/html/txdm/tcys/1058.htm">
+                DIV始终固定在网页右下角位置的CSS实现方法</a></div>
+            <div><span>10/6</span><a title="DIV始终固定在网页右下角位置的CSS实现方法" target="_blank" href="http://www.csrcode.cn/html/txdm/tcys/1058.htm">
+                DIV始终固定在网页右下角位置的CSS实现方法</a></div>
+            <div><span>10/6</span><a title="DIV始终固定在网页右下角位置的CSS实现方法" target="_blank" href="http://www.csrcode.cn/html/txdm/tcys/1058.htm">
+                DIV始终固定在网页右下角位置的CSS实现方法</a></div>
+            <div><span>10/6</span><a title="DIV始终固定在网页右下角位置的CSS实现方法" target="_blank" href="http://www.csrcode.cn/html/txdm/tcys/1058.htm">
+                DIV始终固定在网页右下角位置的CSS实现方法</a></div>
+            <div><span>10/6</span><a title="DIV始终固定在网页右下角位置的CSS实现方法" target="_blank" href="http://www.csrcode.cn/html/txdm/tcys/1058.htm">
+                DIV始终固定在网页右下角位置的CSS实现方法</a></div>
+        </div>
+    </div>
+    <div id="wowslider-container5" class="form-group col-xs-4">
+        学术活动：
+        <hr>
+        <div class=newsList>
+            <div><span>10/6</span><a title="超级漂亮的几款清新、常用的网页CSS布局配色实例" target="_blank" href="http://www.csrcode.cn/html/txdm/tcys/1061.htm">
+                超级漂亮的几款清新、常用的网页CSS布局配色实例1常用的网页CSS布局配色实例2常用的网页CSS布局配色实例3常用的网页CSS布局配色实例</a></div>
+            <div><span>10/6</span><a title="CSS制作斜角上有背景图片的Div层" target="_blank" href="http://www.csrcode.cn/html/txdm/tcys/1060.htm">
+                CSS制作斜角上有背景图片的Div层</a></div>
+            <div><span>10/6</span><a title="Js实现的层展开、层折叠效果，默认时候层是折叠的" target="_blank" href="http://www.csrcode.cn/html/txdm/tcys/1059.htm">
+                Js实现的层展开、层折叠效果，默认时候层是折叠的</a></div>
+            <div><span>10/6</span><a title="DIV始终固定在网页右下角位置的CSS实现方法" target="_blank" href="http://www.csrcode.cn/html/txdm/tcys/1058.htm">
+                DIV始终固定在网页右下角位置的CSS实现方法</a></div>
+            <div><span>10/6</span><a title="DIV始终固定在网页右下角位置的CSS实现方法" target="_blank" href="http://www.csrcode.cn/html/txdm/tcys/1058.htm">
+                DIV始终固定在网页右下角位置的CSS实现方法</a></div>
+            <div><span>10/6</span><a title="DIV始终固定在网页右下角位置的CSS实现方法" target="_blank" href="http://www.csrcode.cn/html/txdm/tcys/1058.htm">
+                DIV始终固定在网页右下角位置的CSS实现方法</a></div>
+            <div><span>10/6</span><a title="DIV始终固定在网页右下角位置的CSS实现方法" target="_blank" href="http://www.csrcode.cn/html/txdm/tcys/1058.htm">
+                DIV始终固定在网页右下角位置的CSS实现方法</a></div>
+            <div><span>10/6</span><a title="DIV始终固定在网页右下角位置的CSS实现方法" target="_blank" href="http://www.csrcode.cn/html/txdm/tcys/1058.htm">
+                DIV始终固定在网页右下角位置的CSS实现方法</a></div>
+        </div>
+    </div>
+</div>
+<div th:replace="fragments/footer :: footer"></div>
+</body>
+<script th:src="@{/js/jquery-1.9.1.min.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}"></script>
+<script th:src="@{/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/js/grid.locale-cn.js}"></script>
+<script th:src="@{/js/bootstrap-select.js}"></script>
+<script th:src="@{/js/moment-with-locales.min.js}"></script>
+<script th:src="@{/js/bootstrap-datetimepicker.min.js}"></script>
+<script th:src="@{/js/bootstrap-datetimepicker.zh-CN.js}"></script>
+
+<script th:src="@{/js/script/wowslider.js}"></script>
+<script th:src="@{/js/script/script.js}"></script>
+<script th:src="@{/js/script/common.js}"></script>
+<script th:inline="javascript">
+    $(document).ready(function () {
+        $("#aboutUs").addClass("active");
+    });
+
+</script>
+</html>

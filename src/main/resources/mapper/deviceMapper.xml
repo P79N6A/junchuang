@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teachingplan.console.dao.device.DeviceDao">
+
+    <update id="modDevice" parameterType="com.teachingplan.console.beans.device.Device">
+        update device_t
+        set name =#{name}, department=#{department}, latitude=#{latitude},
+        longitude=#{longitude}, height=#{height}, ip=#{ip},
+        port=#{port}, camera_id=#{cameraId}, camera_account=#{cameraAccount},
+        camera_password=#{cameraPassword}, airspace=#{airspace}
+        where id = #{id}
+    </update>
+
+    <delete id="delDevice" parameterType="int">
+        delete from device_t where id =#{value}
+    </delete>
+</mapper>

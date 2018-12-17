@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}"/>
+    <link rel="stylesheet" th:href="@{/css/ui.jqgrid-bootstrap-ui.css}"/>
+    <link rel="stylesheet" th:href="@{/css/bootstrap-select.css}"/>
+    <link rel="stylesheet" th:href="@{/css/bootstrap-datetimepicker.min.css}"/>
+    <link rel="stylesheet" th:href="@{/css/style/style.css}"/>
+    <link rel="stylesheet" th:href="@{/css/style/navigation.css}"/>
+    <title>实验室管理系统</title>
+</head>
+<body>
+<div th:replace="fragments/header :: header"></div>
+<input type="hidden" id="type" name="type" th:value="${type}"/>
+<div class="row">
+    <div class="form-group col-xs-2">
+        <div class="nav_left">
+            <div class="nav_div1">
+                <div class="nav_div2">
+                    <div class="nav_zcd"></div>
+                    <a class="button-a" href="/public/aboutUs/lab">实验室简介</a>
+                </div>
+                <div class="nav_div2_zcd">
+                    <div class="nav_zcd"></div>
+                    师资队伍
+                </div>
+                <div id="teacherBar" class="nav_div3">
+                    <ul>
+                        <li> <a class="button-a" href="/public/aboutUs/teacher?type=1">全职教师</a></li>
+                        <li> <a class="button-a" href="/public/aboutUs/teacher?type=2">兼职教师</a></li>
+                    </ul>
+                </div>
+                <div class="nav_div2_zcd">
+                    <div class="nav_zcd"></div>
+                    学生信息
+                </div>
+                <div class="nav_div3">
+                    <ul>
+                        <li><a class="button-a" href="/public/aboutUs/student?type=3">在读学生</a></li>
+                        <li><a class="button-a" href="/public/aboutUs/student?type=4">毕业学生</a></li>
+                    </ul>
+                </div>
+                <div class="nav_div2">
+                    <div class="nav_zcd"></div>
+                    <a class="button-a" href="/public/aboutUs/contactUs">联系我们</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-group col-xs-10">
+        <h2 id="tittle" style="text-align:center"></h2>
+        <div id="jqGrid_wrapper">
+            <table id="jqGridList"></table>
+            <div id="jqGridPager"></div>
+        </div>
+    </div>
+</div>
+<div th:replace="fragments/footer :: footer"></div>
+</body>
+<script th:src="@{/js/jquery-1.9.1.min.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}"></script>
+<script th:src="@{/js/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/js/grid.locale-cn.js}"></script>
+<script th:src="@{/js/bootstrap-select.js}"></script>
+<script th:src="@{/js/moment-with-locales.min.js}"></script>
+<script th:src="@{/js/bootstrap-datetimepicker.min.js}"></script>
+<script th:src="@{/js/bootstrap-datetimepicker.zh-CN.js}"></script>
+
+<script th:src="@{/js/script/wowslider.js}"></script>
+<script th:src="@{/js/script/common.js}"></script>
+<script th:inline="javascript">
+    $(document).ready(function () {
+        $("#aboutUs").addClass("active");
+
+        $("#teacherBar").slideToggle("slow");
+        $(".nav_div2_zcd").click(function () {
+            $(this).next("div .nav_div3").slideToggle("slow")
+                .siblings(".nav_div3:visible").slideUp("slow");
+        });
+
+
+        var jqGrid = $("#jqGridList");
+        var type = $("#type").val();
+        jqGrid.jqGrid({
+            mtype: "GET",
+            styleUI : 'Bootstrap',
+            url: "/public/aboutUs/userInfo?type=" + type,
+            datatype: "json",
+            ajaxGridOptions: { contentType: 'application/json;charset=utf-8' },
+            colModel: [
+                { label: 'id', name: 'id',key: true, width: 40, hidden: true },
+                { label: '姓名', name: 'chName', width: 100},
+                { label: '职称', name: 'title', width: 80},
+                { label: '导师资格', name: 'qualification', width: 80},
+                { label: '实验室职务', name: 'labDuty', width: 100 },
+                { label: '社会兼职', name: 'unit', width: 180 },
+                { label: '学院行政职务', name: 'duty', width: 180 },
+            ],
+            viewrecords: true,
+            height: '60%',
+            rowNum: 10,
+            pager: "#jqGridPager",
+            width:$("#jqGrid_wrapper").width()-10,
+            loadComplete:function (data) {
+                $("#tittle").text(data.mapData.tittle);
+            }
+
+        });
+    });
+
+</script>
+</html>

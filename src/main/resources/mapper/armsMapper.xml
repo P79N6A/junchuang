@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teachingplan.console.dao.arms.ArmsDao">
+
+    <update id="modArms" parameterType="com.teachingplan.console.beans.arms.Arms">
+        update arms_t
+        set name =#{name}, department=#{department}, latitude=#{latitude},
+        longitude=#{longitude}, height=#{height}, ip=#{ip},
+        port=#{port}, camera_id=#{cameraId}, camera_account=#{cameraAccount},
+        camera_password=#{cameraPassword}, airspace=#{airspace}
+        where id = #{id}
+    </update>
+
+    <delete id="delArms" parameterType="int">
+        delete from arms_t where id =#{value}
+    </delete>
+
+    <update id="modAmmunition" parameterType="com.teachingplan.console.beans.arms.Ammunition">
+        update ammunition_t
+        set name =#{name}, model=#{model}, delay=#{delay}
+        where id = #{id}
+    </update>
+
+    <delete id="delAmmunition" parameterType="int">
+        delete from ammunition_t where id =#{value}
+    </delete>
+</mapper>

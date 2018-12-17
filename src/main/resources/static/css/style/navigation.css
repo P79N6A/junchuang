@@ -1,0 +1,9 @@
+.nav_left{ width:200px; height:100%; border-right:1px solid #CCCCCC;color:#000000; font-size:14px; text-align:center;}
+.nav_div1{text-align:center; width:200px; padding-top:10px;}
+.nav_div2{height:40px; line-height:40px;cursor: pointer; font-size:13px; position:relative;border-bottom:#ccc 1px dotted;}
+.nav_div2_zcd{height:40px; line-height:40px;cursor: pointer; font-size:13px; position:relative;border-bottom:#ccc 1px dotted;}
+.nav_zcd {position: absolute; height: 20px; width: 20px; left: 40px; top: 10px}
+.nav_div2_zcd .nav_zcd {position: absolute; height: 20px; width: 20px; left: 40px; top: 10px;background:url(/image/5.png)}
+.nav_div3{display: none;cursor:pointer; font-size:13px;}
+.nav_div3 ul{margin:0;padding:0;}
+.nav_div3 li{ height:30px; line-height:30px; list-style:none; border-bottom:#ccc 1px dotted; text-align:center;}

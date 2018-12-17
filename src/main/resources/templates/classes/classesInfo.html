@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="fragments/head :: head"></head>
+<title>军创电子科技--班级管理</title>
+<body>
+<div th:replace="fragments/header :: header"></div>
+<div th:replace="fragments/menu :: menu"></div>
+<div class="col-sm-10 col-lg-10 main">
+    <div class="row">
+        <ul class="breadcrumb">
+            <li>班级管理</li>
+            <li><a href="/classes/classesList">查看班级列表</a></li>
+            <li class="active">查看班级成员信息</li>
+        </ul>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <span>查询条件</span>
+                </div>
+                <div class="panel-body">
+                    <form action="#" class="form-horizontal" role="form" id="searchForm">
+                        <div class="row">
+                            <div class="form-group col-xs-6">
+                                <label class="teach-control-label col-sm-3 control-label">学校：</label>
+                                <div class="col-sm-5">
+                                    <select class='form-control input-sm' name="schoolId" id="schoolId" th:disabled="${session.account.type == '0'? 'false':'true'}" onchange="searchClasses('schoolId','classesId')">
+                                        <option value="">请选择</option>
+                                        <option th:each="school : ${schools}" th:value="${school.id}" th:selected="${session.account.type == '1' || session.account.type == '2'}"
+                                                th:text="${school.name}">
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group col-xs-6">
+                                <label class="teach-control-label col-sm-3 control-label">班级：</label>
+                                <div class="col-sm-5">
+                                    <select class='form-control input-sm' name="classesId" id="classesId">
+                                        <option value="">请选择</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group col-xs-6">
+                                <label class="teach-control-label col-sm-3 control-label">姓名：</label>
+                                <div class="col-sm-5">
+                                    <input type="text" name="name" class="form-control input-sm" id="name">
+                                </div>
+                            </div>
+                            <div class="form-group col-xs-6">
+                                <label class="teach-control-label col-sm-3 control-label">类型：</label>
+                                <div class="col-sm-5">
+                                    <select class='form-control' name="type" id="type">
+                                        <option value="">所有</option>
+                                        <option value="2">教师</option>
+                                        <option value="3">学员</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="teach-review-btns">
+                        <div class="col-sm-2">
+                            <button class="btn btn-primary" id="btnQuery" onclick="searchData();">
+                                查询
+                            </button>
+                        </div>
+                        <shiro:hasPermission name="addClasses">
+                            <div class="col-sm-2">
+                                <button class="btn btn-primary" onclick="addUser();">添加</button>
+                            </div>
+                            <input type="hidden" value="true" id="hasPermission">
+                        </shiro:hasPermission>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <span>查询结果</span>
+                </div>
+                <div class="panel-body">
+                    <div id="jqGrid_wrapper">
+                        <table id="jqGridList"></table>
+                        <div id="jqGridPager"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加窗口 -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">新增</h4>
+                </div>
+                <div class="modal-body">
+
+                    <form action="#" id="myForm" class="form-horizontal" role="form">
+                        <div class="form-group col-xs-12">
+                            <label for="txt_schoolId" class="col-sm-3 teach-control-label">学校：</label>
+                            <div class="col-sm-5">
+                                <select class='form-control' name="txt_schoolId" id="txt_schoolId" th:disabled="${session.account.type == '0'? 'false':'true'}" onchange="searchClasses('txt_schoolId','txt_classesId')">
+                                    <option value="">请选择</option>
+                                    <option th:each="school : ${schools}" th:value="${school.id}" th:selected="${session.account.type == '1' || session.account.type == '2'}"
+                                            th:text="${school.name}">
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12">
+                            <label for="txt_classesId" class="col-sm-3 teach-control-label">班级：</label>
+                            <div class="col-sm-5">
+                                <select class='form-control' name="classesId" id="txt_classesId">
+                                    <option value="">请选择</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12">
+                            <label for="txt_account" class="col-sm-3 teach-control-label">账号：</label>
+                            <div class="col-sm-5">
+                                <input type="text" name="account" class="form-control" id="txt_account" required >
+                                <label id="txt_account-error" class="error" for="txt_account"></label>
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12" id="school_div">
+                            <label for="txt_type" class="col-sm-3 teach-control-label">类型：</label>
+                            <div class="col-sm-5">
+                                <select class='form-control' name="type" id="txt_type" required>
+                                    <option value="">请选择</option>
+                                    <option value="2">教师</option>
+                                    <option value="3">学员</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            &nbsp;
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal"><span
+                            class="glyphicon glyphicon-remove" aria-hidden="true" th:text="取消"></span></button>
+                    <button type="button" id="btn_submit" class="btn btn-primary"><span class="glyphicon glyphicon-ok"
+                                                                                        aria-hidden="true"
+                                                                                        th:text="确定"></span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div></div>
+</body>
+<script th:inline="javascript">
+
+    var jqGrid = $("#jqGridList");
+    $(document).ready(function () {
+        searchClasses('schoolId','classesId');
+        var url = '/classes/searchUserList?' + $('#searchForm').serialize();
+        jqGrid.jqGrid({
+            mtype: "GET",
+            styleUI : 'Bootstrap',
+            url: url,
+            datatype: "json",
+            ajaxGridOptions: { contentType: 'application/json;charset=utf-8' },
+            colModel: [
+                { label: 'id', name: 'id',key: true, align: 'center', width: $("#jqGridList").width()*0.15, hidden: true },
+                { label: '账号', name: 'account', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '姓名', name: 'name', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '班级id', name: 'classesId', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false,hidden: true},
+                { label: '班级', name: 'classes', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '学校', name: 'schoolName', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '类型', name: 'type', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false,
+                    formatter: function(cellValue, options, rowObject) {
+
+                        if(cellValue == 2) return "教师";
+                        else if(cellValue == 3) return "学员";
+                    }
+                },
+                { label: '操作',name: 'Operation', frozen: true, align: 'center', sortable: false, width: $("#jqGridList").width()*0.25},
+            ],
+            viewrecords: true,
+            rowList: [5, 10, 15, 20, 30],
+            rowNum: 10,
+            pager: "#jqGridPager",
+            sortable: true,
+            sortorder: "asc",
+            width:$("#jqGrid_wrapper").width()-10,
+            height: $(window).height() * 0.4,
+//            rownumbers: true,
+//            rownumWidth:  $("#jqGridList").width()*0.1,
+
+            gridComplete:function(){
+                var hasPermission = $("#hasPermission").val();
+                if (hasPermission == "true") {
+                    var ids = jqGrid.getDataIDs();
+                    for (var i = 0; i < ids.length; i++) {
+                        var gridData= jqGrid.jqGrid("getRowData",ids[i]);
+                        var data ='<a href="javascript:void(0);" style="margin-left: 8px" onclick=\'delUser("' + gridData.classesId + '","' + gridData.account +'")\' >删除</a>';
+                        jqGrid.jqGrid('setCell',ids[i], 'Operation', data);
+                    }
+                }
+            }
+
+        });
+
+    });
+
+    flag = false;
+    function addUser() {
+        // 初始化输入框中的数据
+        $("#txt_account").val("");
+        $("#txt_type").val("");
+        $("#txt_account-error").hide();
+
+        searchClasses('txt_schoolId','txt_classesId')
+
+        $("#myForm").attr("action", "/classes/addUser");
+        $("#myModalLabel").text("新增成员");
+        $('#myModal').modal();
+    }
+    
+    $("#btn_submit").click(function (){
+        if ($("#myForm").valid()) {
+
+            $.ajax({
+                type: "POST",
+                url: $("#myForm").attr("action"),
+                data:$('#myForm').serialize(),
+                async: false,
+                success: function(data) {
+                    if (data.message == "success")
+                    {
+                        BootstrapDialog.alert("操作成功");
+                        $('#myModal').modal('hide');
+                        var pageNo = $('#jqGrid').getGridParam('page');
+                        searchData(pageNo);
+                    } else if (data.message == "accountError") {
+                        $("#txt_account-error").text("该账号在该学校中不存在").show();
+                        return;
+                    } else if (data.message == "typeError") {
+                        $("#txt_account-error").text("账号与类型不匹配").show();
+                        return;
+                    }
+                    else {
+                        BootstrapDialog.alert(data.message);
+                    }
+                },
+                error: function(request) {
+                    BootstrapDialog.alert("Connection error");
+                }
+            });
+        }
+    });
+
+    function searchData(pageNo) {
+        var url = '/classes/searchUserList?' + $('#searchForm').serialize();
+        jqGrid.jqGrid('setGridParam', { page: pageNo,url: url, datatype: 'json'}).trigger("reloadGrid");
+
+    }
+
+    function delUser(id,account) {
+        BootstrapDialog.confirm("确定删除该成员？", function(result){
+            if(result) {
+                $.ajax({
+                    type: "GET",
+                    url: "/classes/delUser?id=" + id + "&account=" + account,
+                    async: false,
+                    success: function(data) {
+                        if (data.message == "success")
+                        {
+                            BootstrapDialog.alert("操作成功");
+                            var pageNo = $('#jqGrid').getGridParam('page');
+                            searchData(pageNo);
+                        }
+                        else {
+                            BootstrapDialog.alert(data.message);
+                        }
+                    },
+                    error: function(request) {
+                        BootstrapDialog.alert("Connection error");
+                    }
+                });
+            }else {
+                return;
+            }
+        })
+
+    }
+
+    function searchClasses(schoolId,classesId) {
+        var schoolId = $("#" + schoolId).val();
+        if (schoolId == "") {
+            return;
+        }
+        $("#" +classesId +" option").remove();
+        $("#" + classesId).append("<option value=''>请选择</option>");
+        $.ajax({
+            type: "GET",
+            url: "/classes/searchClasses?schoolId=" + schoolId,
+            async: false,
+            success: function(data) {
+                if (data.message == "success")
+                {
+                    var classes = data.classes;
+                    $.each(classes, function (index, item) {
+                        var id = classes[index].id;
+                        var text = classes[index].name;
+                        $("#" + classesId).append("<option value='"+id+"'>"+text+"</option>");
+                    });
+
+                }
+                else {
+                    var jsonData = $.parseJSON(data);
+                    BootstrapDialog.alert(jsonData.errorMsg);
+                }
+            },
+            error: function(request) {
+                BootstrapDialog.alert("Connection error");
+            }
+        });
+    }
+</script>
+</html>

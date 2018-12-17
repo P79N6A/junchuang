@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teachingplan.console.dao.classes.ClassesDao">
+
+    <resultMap id="Classes" type="com.teachingplan.console.beans.classes.Classes">
+    </resultMap>
+    <resultMap id="Student" type="com.teachingplan.console.beans.user.Student">
+        <result property="schoolId" column="school_id"></result>
+        <result property="parentPhone" column="parent_phone"></result>
+    </resultMap>
+
+    <select id="findClasses" resultMap="Classes">
+        select * from classes_t where name=#{name} and school_id=#{schoolId}
+    </select>
+
+    <select id="findClassesById" parameterType="int" resultMap="Classes">
+        select * from classes_v where id=#{value}
+    </select>
+
+    <select id="getClassBySchoolId" parameterType="int" resultMap="Classes">
+        select * from classes_t where school_id=#{value}
+    </select>
+
+    <select id="hasUser" parameterType="int" resultType="int">
+        select count(*) from user_classes_t where classes_id=#{value}
+    </select>
+
+    <update id="modClasses" parameterType="com.teachingplan.console.beans.classes.Classes">
+        update classes_t set name =#{name}, remark=#{remark} where id = #{id}
+    </update>
+    <delete id="removeUserClasses" parameterType="int" >
+        delete from user_classes_t where account_id =#{value}
+    </delete>
+
+    <delete id="delClasses" parameterType="int" >
+        delete from classes_t where id =#{value}
+    </delete>
+    <delete id="userUnbindClasses" >
+        delete from user_classes_t where classes_id =#{classId} and account_id=#{accountId}
+    </delete>
+
+
+    <select id="getClassesList" parameterType="Map"  resultMap="Student">
+        select * from classes_user_v si
+        <where>
+            <if test="name != null and name != '' ">
+                and name like "%"#{name}"%"
+            </if>
+            <if test="type != null and type != '' ">
+                and type = #{type}
+            </if>
+            <if test="schoolId != null and schoolId != '' ">
+                and schoolId = #{schoolId}
+            </if>
+            <if test="classesId != null and classesId.size > 0">
+                and classesId IN
+                <foreach collection="classesId" index="index" item="item" open="(" separator="," close=")">
+                        #{item}
+                </foreach>
+            </if>
+        </where>
+        limit #{beginIndex}, #{pageSize}
+    </select>
+
+    <select id="getClassesCount" parameterType="Map"  resultType="int">
+        select count(*) from classes_user_v si
+        <where>
+            <if test="name != null and name != '' ">
+                and name like "%"#{name}"%"
+            </if>
+            <if test="type != null and type != '' ">
+                and type = #{type}
+            </if>
+            <if test="schoolId != null and schoolId != '' ">
+                and schoolId = #{schoolId}
+            </if>
+            <if test="classesId != null and classesId.size > 0">
+                and classesId IN
+                <foreach collection="classesId" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+        </where>
+    </select>
+</mapper>

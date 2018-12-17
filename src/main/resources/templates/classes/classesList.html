@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:replace="fragments/head :: head"></head>
+<title>军创电子科技--班级管理</title>
+<body>
+<div th:replace="fragments/header :: header"></div>
+<div th:replace="fragments/menu :: menu"></div>
+<div class="col-sm-10 col-lg-10 main">
+    <div class="row">
+        <ul class="breadcrumb">
+            <li>班级管理</li>
+            <li class="active">查看班级列表</li>
+        </ul>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <span>查询条件</span>
+                </div>
+                <div class="panel-body">
+                    <form action="#" class="form-horizontal" role="form" id="searchForm">
+                        <div class="row">
+                            <div class="form-group col-xs-6">
+                                <label class="teach-control-label col-sm-3 control-label">学校：</label>
+                                <div class="col-sm-4">
+                                    <input type="text" name="schoolName" class="form-control input-sm" id="schoolName">
+                                </div>
+                            </div>
+                            <div class="form-group col-xs-6">
+                                <label class="teach-control-label col-sm-3 control-label">班级：</label>
+                                <div class="col-sm-4">
+                                    <input type="text" name="name" class="form-control input-sm" id="name">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="teach-review-btns">
+                        <div class="col-sm-2">
+                            <button class="btn btn-primary" id="btnQuery" onclick="searchData();">
+                                查询
+                            </button>
+                        </div>
+                        <shiro:hasPermission name="addClasses">
+                            <div class="col-sm-2">
+                                <button class="btn btn-primary" onclick="addClasses();">添加</button>
+                            </div>
+                            <input type="hidden" value="true" id="hasPermission">
+                        </shiro:hasPermission>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <span>查询结果</span>
+                </div>
+                <div class="panel-body">
+                    <div id="jqGrid_wrapper">
+                        <table id="jqGridList"></table>
+                        <div id="jqGridPager"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加窗口 -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <input type="hidden" id="type" th:value="${session.account.type}"/>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">新增</h4>
+                </div>
+                <div class="modal-body">
+
+                    <form action="#" id="myForm" class="form-horizontal" role="form">
+                        <input type="hidden" id="classes_id" name="id" value="0"/>
+                        <div class="form-group col-xs-12">
+                            <label for="txt_name" class="col-sm-3 teach-control-label">班级名称：</label>
+                            <div class="col-sm-5">
+                                <input type="text" name="name" class="form-control" id="txt_name" required >
+                                <label id="txt_name-error" class="error" for="txt_name" style="display: none;"></label>
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12">
+                            <label for="txt_school" class="col-sm-3 teach-control-label">学校：</label>
+                            <div class="col-sm-5">
+                                <select class='form-control' name="schoolId" id="txt_school" required th:disabled="${session.account.type == '0'? 'false':'true'}">
+                                    <option value="">请选择</option>
+                                    <option th:each="school : ${schools}" th:value="${school.id}" th:selected="${session.account.type == '1'}"
+                                            th:text="${school.name}">
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group col-xs-12">
+                            <label for="txt_remark" class="col-sm-3 teach-control-label">备注：</label>
+                            <div class="col-sm-5">
+                                <textarea type="text" name="remark" class="form-control" id="txt_remark" ></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            &nbsp;
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal"><span
+                            class="glyphicon glyphicon-remove" aria-hidden="true" th:text="取消"></span></button>
+                    <button type="button" id="btn_submit" class="btn btn-primary"><span class="glyphicon glyphicon-ok"
+                                                                                        aria-hidden="true"
+                                                                                        th:text="确定"></span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div></div>
+</body>
+<script th:inline="javascript">
+
+    var jqGrid = $("#jqGridList");
+    var accountType = $("#type").val();
+    $(document).ready(function () {
+        var url = '/classes/searchData?' + $('#searchForm').serialize() ;
+        jqGrid.jqGrid({
+            mtype: "GET",
+            styleUI : 'Bootstrap',
+            url: url,
+            datatype: "json",
+            ajaxGridOptions: { contentType: 'application/json;charset=utf-8' },
+            colModel: [
+                { label: 'id', name: 'id',key: true, align: 'center', width: $("#jqGridList").width()*0.15, hidden: true },
+                { label: '班级', name: 'name', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '学校', name: 'schoolName', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '人数', name: 'count', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '备注', name: 'remark', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '操作',name: 'Operation', frozen: true, align: 'center', sortable: false, width: $("#jqGridList").width()*0.25},
+            ],
+            viewrecords: true,
+            rowList: [5, 10, 15, 20, 30],
+            rowNum: 10,
+            pager: "#jqGridPager",
+            sortable: true,
+            sortorder: "asc",
+            width:$("#jqGrid_wrapper").width()-10,
+            height: $(window).height() * 0.4,
+//            rownumbers: true,
+//            rownumWidth:  $("#jqGridList").width()*0.1,
+            gridComplete: function () {
+                var hasPermission = $("#hasPermission").val();
+                var ids = jqGrid.getDataIDs();
+
+
+                for (var i = 0; i < ids.length; i++) {
+                    var gridData = jqGrid.jqGrid("getRowData", ids[i]);
+                    var operationData = '<a href="javascript:void(0);" onclick=\'editClasses("' + gridData.id + '","' + gridData.name + '")\' >编辑</a>' +
+                        '<a href="javascript:void(0);" style="margin-left: 8px" onclick=\'delClasses("' + gridData.id + '")\' >删除</a>';
+                    if (hasPermission == "true") {
+                        jqGrid.jqGrid('setCell', ids[i], 'Operation', operationData);
+                    }
+                    var nameData;
+                    if (gridData.count > 0) {
+                        nameData= '<a href="/classes/classesInfo?classesId='+ gridData.id + '" title="查看班级成员信息">'+gridData.name+'</a>';
+                    }
+                    else {
+                        nameData = gridData.name;
+                    }
+                    jqGrid.jqGrid('setCell', ids[i], 'name', nameData);
+                }
+            }
+
+        });
+
+    });
+
+
+
+    function checkAccount() {
+        var flag = false;
+        var name = $('#txt_name').val();
+        var schoolId = $('#txt_school').val();
+        $.ajax({
+            type: "GET",
+            url: "/classes/checkName?name=" + name + "&schoolId=" + schoolId,
+            async: false,
+            success: function(data) {
+                if (data.isExist == "true")
+                {
+                    $("#txt_name-error").text("该学校的班级名称已存在").show();
+                    flag = false;
+                } else {
+                    $("#txt_name-error").hide();
+                    flag = true;
+                }
+            },
+            error: function(request) {
+                BootstrapDialog.alert("Connection error");
+                flag = false;
+            }
+        });
+
+        return flag;
+    }
+
+    $("#btn_submit").click(function (){
+        if ($("#myForm").valid()) {
+            if($("#myForm").attr("action") == "/classes/addClasses"){
+                if (!checkAccount()) {
+                    return;
+                }
+            }
+            var url ;
+            if($("#txt_school").prop("disabled")) {
+                url= $("#myForm").attr("action") + "?schoolId=" + $("#txt_school").val();
+            } else {
+                url = $("#myForm").attr("action");
+            }
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                data:$('#myForm').serialize(),
+                async: false,
+                success: function(data) {
+                    if (data.message == "success")
+                    {
+                        BootstrapDialog.alert("操作成功");
+                        $('#myModal').modal('hide');
+                        var pageNo = $('#jqGrid').getGridParam('page');
+                        searchData(pageNo);
+                    }
+                    else {
+                        var jsonData = $.parseJSON(data);
+                        BootstrapDialog.alert(jsonData.errorMsg);
+                    }
+                },
+                error: function(request) {
+                    BootstrapDialog.alert("Connection error");
+                }
+            });
+        }
+    });
+
+    function searchData(pageNo) {
+        var url = '/classes/searchData?' + $('#searchForm').serialize();
+        jqGrid.jqGrid('setGridParam', { page: pageNo,url: url, datatype: 'json'}).trigger("reloadGrid");
+
+    }
+
+    function addClasses() {
+        // 初始化输入框中的数据
+        if (accountType == "0") {
+            $("#txt_school").val("");
+            $('#txt_school').attr("disabled",false);
+        }
+        $("#txt_name").val("");
+        $("#txt_remark").val("");
+        $("#txt_name-error").hide();
+
+        $("#myForm").attr("action", "/classes/addClasses");
+        $("#myModalLabel").text("新增");
+        $('#myModal').modal();
+    }
+
+    function editClasses(classesId,className) {
+
+        var rowData = jqGrid.jqGrid('getRowData',classesId);
+        // 初始化输入框中的数据
+        var schoolName = rowData.schoolName;
+        $('#txt_school option').filter(function(){return $(this).text()== schoolName ;}).attr("selected",true);
+        $('#txt_school').attr("disabled",true);
+        $("#txt_name").val(className);
+        $("#txt_remark").val(rowData.remark);
+        $("#classes_id").val(classesId);
+        $("#txt_name-error").hide();
+
+        $("#myForm").attr("action", "/classes/modClasses");
+        $("#myModalLabel").text("编辑");
+        $('#myModal').modal();
+    }
+    function delClasses(id) {
+        BootstrapDialog.confirm("删除该班级之前确定该班级下的教师或学员已经删除？", function(result){
+            if(result) {
+                $.ajax({
+                    type: "GET",
+                    url: "/classes/delClasses?id=" + id,
+                    async: false,
+                    success: function(data) {
+                        if (data.msg == "success")
+                        {
+                            BootstrapDialog.alert("操作成功");
+                            var pageNo = $('#jqGrid').getGridParam('page');
+                            searchData(pageNo);
+                        } else if(data.msg == "hasUser") {
+                            BootstrapDialog.alert("该班级下有教师或学员信息，不能删除！");
+                            return;
+                        }
+                        else {
+                            var jsonData = $.parseJSON(data);
+                            BootstrapDialog.alert(jsonData.errorMsg);
+                        }
+                    },
+                    error: function(request) {
+                        BootstrapDialog.alert("Connection error");
+                    }
+                });
+            }else {
+                return;
+            }
+        })
+    }
+</script>
+</html>

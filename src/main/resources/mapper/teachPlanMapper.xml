@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teachingplan.console.dao.teachPlan.TeachPlanDao">
+
+    <resultMap id="TeachPlan" type="com.teachingplan.console.beans.teachPlan.TeachPlan">
+    </resultMap>
+
+    <select id="getTeachPlanById" parameterType="int" resultMap="TeachPlan">
+        select * from teach_plan_v where id=#{value}
+    </select>
+
+    <select id="getTeachPlanCountOfUser" resultType="int">
+        select count(*) from user_teach_plan_t
+        <where>
+            <if test="accountId != null and accountId != '' ">
+                and account_id = #{accountId}
+            </if>
+            <if test="teachPlanId != null and teachPlanId != '' ">
+                and teach_plan_id = #{teachPlanId}
+            </if>
+        </where>
+    </select>
+
+    <update id="modTeachPlan" parameterType="com.teachingplan.console.beans.teachPlan.TeachPlan">
+        update teach_plan_t
+        set name =#{name}, type=#{type},course_id=#{courseId},scene_id=#{sceneId},theme_id=#{themeId},
+        summary=#{summary}, prepare=#{prepare},prepare_file_path=#{prepareFilePath},prepare_file_name=#{prepareFileName},
+        content=#{content},ppt_file_path=#{pptFilePath},ppt_file_name=#{pptFileName}
+        where id = #{id}
+    </update>
+
+    <delete id="delTeachPlan" parameterType="int" >
+        delete from teach_plan_t where id =#{value}
+    </delete>
+
+
+    <select id="getDetails" parameterType="Map"  resultMap="TeachPlan">
+
+        <if test="accountType == '1'.toString() ">
+            select group_concat(a.account separator ',') AS account,tp.*,a.type as accountType,group_concat(s.name separator ',') AS `userName`
+            from user_teach_plan_t utp LEFT JOIN account_t a  on a.id=utp.account_id LEFT JOIN school_t s on s.account_id=a.id
+            LEFT JOIN teach_plan_t tp on utp.teach_plan_id=tp.id where a.type=1
+        </if>
+        <if test="accountType == '2'.toString() ">
+            select group_concat(a.account separator ',') AS account,tp.*,a.type as accountType,group_concat(t.name separator ',') AS `userName`
+            from user_teach_plan_t utp
+            LEFT JOIN account_t a  on a.id=utp.account_id LEFT JOIN teacher_t t on t.account_id=a.id
+            LEFT JOIN teach_plan_t tp on utp.teach_plan_id=tp.id where a.type=2
+            <if test="schoolId != null and schoolId != '' ">
+                and t.school_id=#{schoolId}
+            </if>
+        </if>
+        <if test="name != null and name != '' ">
+            and tp.name like "%"#{name}"%"
+        </if>
+        <if test="id != null and id != '' ">
+            and tp.id = #{id}
+        </if>
+        group by tp.id
+        limit #{beginIndex}, #{pageSize}
+    </select>
+
+    <select id="getDetailCount" parameterType="Map"  resultType="int">
+        select count(*) from (
+        <if test="accountType == '1'.toString() ">
+            select group_concat(a.account separator ',') AS account,tp.*,a.type as accountType,group_concat(s.name
+            separator ',') AS `userName`
+            from user_teach_plan_t utp LEFT JOIN account_t a on a.id=utp.account_id LEFT JOIN school_t s on
+            s.account_id=a.id
+            LEFT JOIN teach_plan_t tp on utp.teach_plan_id=tp.id where a.type=1
+        </if>
+        <if test="accountType == '2'.toString() ">
+            select group_concat(a.account separator ',') AS account,tp.*,a.type as accountType,group_concat(t.name
+            separator ',') AS `userName`
+            from user_teach_plan_t utp
+            LEFT JOIN account_t a on a.id=utp.account_id LEFT JOIN teacher_t t on t.account_id=a.id
+            LEFT JOIN teach_plan_t tp on utp.teach_plan_id=tp.id where a.type=2
+            <if test="account != null and account != '' ">
+                and a.account=#{account}
+            </if>
+        </if>
+        group by tp.id
+        <if test="name != null and name != '' ">
+            and tp.name like "%"#{name}"%"
+        </if>
+        <if test="id != null and id != '' ">
+            and tp.id = #{id}
+        </if>
+        ) ttt
+    </select>
+
+</mapper>

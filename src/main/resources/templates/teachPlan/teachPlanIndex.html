@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/head :: head"></head>
+<title>军创电子科技--教案管理</title>
+<body>
+<div th:replace="fragments/header :: header"></div>
+<div th:replace="fragments/menu :: menu"></div>
+<div class="col-sm-10 col-lg-10 main">
+    <div class="row">
+        <ul class="breadcrumb">
+            <li>教案管理</li>
+            <li class="active">查看教案列表</li>
+        </ul>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <a href="/teachPlan/teachPlanList?type=1" title="查看更多">基础课程</a>
+                </div>
+                <div class="panel-body">
+                    <div class="box">
+                        <div class="box-content">
+                            <div class="teach-index-row">
+                                <ul>
+                                    <li th:each="baseCourse : ${baseCourses}"><a th:href="'/teachPlan/teachPlanList?type=1&courseId=' + ${baseCourse.id}"><img th:src="${baseCourse.filePath}"><span th:text="${baseCourse.text}"></span></a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <a href="/teachPlan/teachPlanList?type=2" title="查看更多">特色课程</a>
+                </div>
+                <div class="panel-body">
+                    <div class="box">
+                        <div class="box-content">
+                            <div class="teach-index-row">
+                                <ul>
+                                    <li th:each="speCourse : ${speCourses}"><a th:href="'/teachPlan/teachPlanList?type=2&courseId=' + ${speCourse.id}"><img th:src="${speCourse.filePath}"><span th:text="${speCourse.text}"></span></a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div></div>
+</body>
+<script th:inline="javascript">
+
+    var jqGrid = $("#jqGridList");
+    $(document).ready(function () {
+        var url = '/teachPlan/searchData?' + $('#searchForm').serialize() ;
+        jqGrid.jqGrid({
+            mtype: "GET",
+            styleUI : 'Bootstrap',
+            url: url,
+            datatype: "json",
+            ajaxGridOptions: { contentType: 'application/json;charset=utf-8' },
+            colModel: [
+                { label: 'id', name: 'id',key: true, align: 'center', width: $("#jqGridList").width()*0.15, hidden: true },
+                { label: '教案名称', name: 'name', title:'aaaaaa', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false,formatter: function (cellValue, options, cellObject) {
+                    return '<a href="/teachPlan/teachPlanInfo?teachPlanId='+ cellObject.id + '" title="查看教案详细信息">'+cellObject.name+'</a>';
+                }},
+                { label: '类型', name: 'type', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false,
+                    formatter: function(cellValue, options, rowObject) {
+
+                        if(cellValue == 1) return "基础课程";
+                        else if(cellValue == 2) return "特色课程";
+                    }
+                },
+                { label: '课程', name: 'courseName', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '场景', name: 'sceneName', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '主题', name: 'themeName', align: 'center', width: $("#jqGridList").width()*0.15,sortable: false},
+                { label: '概述', name: 'summary', align: 'center', width: $("#jqGridList").width()*0.25,sortable: false},
+                { label: '操作',name: 'Operation', frozen: true, align: 'center', sortable: false, width: $("#jqGridList").width()*0.25, formatter: function (cellValue, options, cellObject) {
+                    return '<a href="javascript:void(0);" style="margin-left: 8px" onclick=\'delTeachPlan("' + cellObject.id + '")\' >删除</a>';
+                }},
+            ],
+            viewrecords: true,
+            rowList: [5, 10, 15, 20, 30],
+            rowNum: 10,
+            pager: "#jqGridPager",
+            sortable: true,
+            sortorder: "asc",
+            width:$("#jqGrid_wrapper").width()-10,
+            height: $(window).height() * 0.4,
+            multiselect: true,//复选框
+//            rownumbers: true,
+//            rownumWidth:  $("#jqGridList").width()*0.1,
+//            gridComplete:function(){
+//                jqGrid.jqGrid('setLabel', 'rn', '序号', {
+//                    'text-align' : 'center'
+//                });
+//            }
+
+        });
+
+    });
+
+
+    function searchData(pageNo) {
+        var url = '/teachPlan/searchData?' + $('#searchForm').serialize();
+        jqGrid.jqGrid('setGridParam', { page: pageNo,url: url, datatype: 'json'}).trigger("reloadGrid");
+
+    }
+
+
+    $('#datetimepicker').datetimepicker({
+        format: 'yyyy-mm-dd',
+        minView: "month",//设置只显示到月份
+        autoclose:true,//选中关闭
+        locale: moment.locale('zh-cn')
+    });
+
+    function delTeachPlan(id) {
+        BootstrapDialog.confirm("确定删除该教案？", function(result){
+            if(result) {
+                $.ajax({
+                    type: "GET",
+                    url: "/teachPlan/delTeachPlan?id=" + id,
+                    async: false,
+                    success: function(data) {
+                        if (data.msg == "success")
+                        {
+                            BootstrapDialog.alert("操作成功");
+                            var pageNo = $('#jqGrid').getGridParam('page');
+                            searchData(pageNo);
+                        }
+                        else {
+                            var jsonData = $.parseJSON(data);
+                            BootstrapDialog.alert(jsonData.errorMsg);
+                        }
+                    },
+                    error: function(request) {
+                        BootstrapDialog.alert("Connection error");
+                    }
+                });
+            }else {
+                return;
+            }
+        })
+
+    }
+</script>
+</html>

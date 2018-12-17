@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<header th:fragment="header">
+    <div class="navbar navbar-inverse" role="navigation">
+        <div class="navbar-header">
+            <a href="##" class="navbar-brand">LOGO</a>
+        </div>
+        <ul class="nav navbar-nav">
+            <li id="index"><a href="/">首页</a></li>
+
+        </ul>
+
+        <!-- 右侧角色信息等 -->
+        <div class="pull-right">
+            <ul class="nav navbar-nav">
+                <li th:if="${session.account == null}">
+                <a href="/login" >
+                        <span th:text="去登录"></span>
+                    </a>
+                </li>
+                <li class="dropdown-submenu" th:if="${session.account!=null}">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" >
+                        <span id="session_account" th:text="${session.account.account}"></span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-right" style="margin-top: 50px" role="menu">
+                        <li>
+                            <a th:href="@{/user/modPassword}">
+                                <i class="fa fa-user"></i>
+                                <span class="text">修改密码</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a th:href="@{/logout}">
+                                <i class="fa fa-power-off"></i>
+                                <span class="text">退出登录</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</header>

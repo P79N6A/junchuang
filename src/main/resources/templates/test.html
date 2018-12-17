@@ -1,0 +1,63 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>Title</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/css/ui.jqgrid.css"/>
+</head>
+<body>
+
+<div class="jqGrid_wrapper">
+    <table id="jqGridList"></table>
+    <div id="jqGridPager"></div>
+</div>
+<script src="/js/jquery-1.9.1.min.js" type="text/javascript"></script>
+<script src="/js/bootstrap.min.js" type="text/javascript"></script>
+<script src="/js/jquery.jqGrid.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+
+    var jqGrid = $("#jqGridList");
+    var url = '/account/searchData';
+    jqGrid.jqGrid({
+        mtype: "GET",
+        styleUI : 'Bootstrap',
+        url: url,
+        datatype: "json",
+        ajaxGridOptions: { contentType: 'application/json;charset=utf-8' },
+        colModel: [
+            { label: 'id', name: 'id',key: true, width: 40, hidden: false },
+            { label: '账号', name: 'account', width: 100},
+            { label: '学校', name: 'type', width: 100 },
+            { label: '状态', name: 'status', width: 100 },
+            { label: '操作',name: 'Operation', frozen: true, align: 'center', sortable: false, width: 40, formatter: function (cellValue, options, cellObject) {
+                return '<a href="javascript:void(0);" onclick=\'edit("' + cellObject.id + '")\' >编辑</a>&nbsp;' +
+                    '<a href="javascript:void(0);" onclick=\'del("' + cellObject.id + '")\' >删除</a>';
+            }},
+        ],
+        viewrecords: true,
+        rowList: [5, 10, 15, 20, 30],
+        height: 300,
+        rowNum: 10,
+        pager: "#jqGridPager",
+        sortable: true,
+        sortorder: "asc",
+        width:$("#jqGrid_wrapper").width()-10,
+        gridComplete:function(){
+            debugger;
+            var ids = $("#jqGridList").jqGrid("getDataIDs");
+
+        }
+
+    });
+
+    // 设置jqgrid的宽度
+    $(window).bind('resize', function () {
+        var width = $('.jqGrid_wrapper').width();
+        jqGrid.setGridWidth(width);
+    });
+
+
+</script>
+</body>
+</html>
